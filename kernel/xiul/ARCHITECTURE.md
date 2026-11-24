@@ -7,7 +7,7 @@ Hardware
   |
 XIUL machine/platform layer
   |
-Mach-derived kernel foundation (source: xnu/)
+Mach microkernel foundation (selected sources: mach/)
   |
 XIUL subsystem and compatibility interfaces
   |-- Linux driver compatibility (source: linux/)
@@ -27,9 +27,11 @@ This is a logical ownership diagram, not a claim that upstream source trees alre
 
 | Source | Intended contribution | Integration boundary |
 |---|---|---|
-| XNU / Mach | Low-level kernel foundation and Mach mechanisms | XIUL machine, memory, IPC, scheduling and platform contracts |
+| Mach (`osfmk` subset) | IPC, tasks, threads and microkernel mechanisms | XIUL machine, memory, scheduling and platform contracts |
 | Linux | Selected hardware drivers | Linux compatibility layer; XIUL owns device lifecycle |
 | FreeBSD | Networking and filesystem components | XIUL network-buffer, locking, timer, VFS and device interfaces |
+
+The Mach code originates from the `osfmk/` directory in the Darwin XNU repository. XIUL must import only the reviewed Mach source and the supporting files it actually requires. The complete XNU source tree is not part of XIUL.
 
 ## Ownership
 
@@ -48,23 +50,25 @@ This is a logical ownership diagram, not a claim that upstream source trees alre
 
 ## Integration stages
 
-1. Pin upstream source revisions as submodules.
-2. Define XIUL types and kernel contracts for memory, locking, devices, buffers, VFS and networking.
-3. Establish a bootable Mach-derived base for one supported architecture.
-4. Port a small Linux driver subset and test probe/remove, DMA, interrupts and power lifecycle.
-5. Port BSD networking components while resolving their dependencies.
-6. Port BSD filesystem components behind XIUL's VFS boundary.
-7. Implement POSIX-facing interfaces and NKE.
-8. Add automated boot, driver, network and filesystem tests.
+1. Select the Mach source files from upstream `osfmk/` and identify their required headers, machine-dependent code and supporting dependencies.
+2. Import that reviewed Mach subset into `kernel/xiul/mach/`; do not vendor the complete XNU tree.
+3. Define XIUL types and kernel contracts for memory, locking, devices, buffers, VFS and networking.
+4. Establish a bootable Mach-derived base for one supported architecture.
+5. Port a small Linux driver subset and test probe/remove, DMA, interrupts and power lifecycle.
+6. Port BSD networking components while resolving their dependencies.
+7. Port BSD filesystem components behind XIUL's VFS boundary.
+8. Implement POSIX-facing interfaces and NKE.
+9. Add automated boot, driver, network and filesystem tests.
 
 ## Important constraints
 
-- XNU is an integrated kernel source tree, not merely Mach. `xnu/osfmk` depends on XNU facilities including pmap, IPC, task/thread, allocators, locks, machine code and platform expert components.
+- Mach is part of XNU's `osfmk/` source tree, not a separately maintained upstream repository. Its source has dependencies on machine-dependent code, platform support, headers and other kernel facilities. A directory-only copy is not guaranteed to compile or boot.
+- Do not import unrelated XNU components merely to make the source tree look complete. Review and include only dependencies required by the selected Mach implementation.
 - Linux-derived code is generally GPL-2.0-only; preserve licensing and conduct a GPL compliance review.
 - FreeBSD files have varying license terms; inspect file-level notices and contributed components.
-- XNU includes Apple Public Source License and other component-specific licensing. Inspect the exact files selected for integration.
+- Preserve Apple Public Source License and other component-specific notices for every imported Mach file.
 - Do not claim a subsystem is implemented merely because its upstream source exists.
 
 ## Current implementation boundary
 
-The source repositories are now located under `kernel/xiul/`. Their code has not yet been merged into a unified kernel. XIUL is not yet claimed to build or boot.
+The current tracked tree contains `kernel/xiul/freebsd/`. The Mach-only source subset and Linux driver source are not yet present. Their adapters, the boot sequence, platform layer and end-to-end kernel build remain unimplemented. XIUL is not yet claimed to build or boot.
