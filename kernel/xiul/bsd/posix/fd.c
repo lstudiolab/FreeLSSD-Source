@@ -13,6 +13,8 @@ xiul_status_t xiul_posix_fd_install(xiul_posix_process_t *process,
     size_t i;
     if (process == 0 || file == 0 || !file->active || descriptor == 0)
         return XIUL_E_INVALID;
+    for (i = 0; i < XIUL_POSIX_FD_MAX; ++i)
+        if (process->files[i] == file) return XIUL_E_DUPLICATE;
     for (i = 0; i < XIUL_POSIX_FD_MAX; ++i) {
         if (process->files[i] != 0) continue;
         process->files[i] = file;
