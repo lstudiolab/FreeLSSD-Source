@@ -7,7 +7,7 @@ This document separates imported source, XIUL-owned tested code and actual upstr
 | Area | Imported source | XIUL-owned code | Upstream integration/build |
 |---|---|---|---|
 | Mach | XNU `osfmk/` subtree only | Shared boot coordinator invokes platform/PCI initialization | Mach task/thread, IPC, VM and scheduler not yet integrated |
-| Linux drivers | Full Linux source tree | Device registry, generic PCI enumeration, x86_64 CF8/CFC and ARM64 ECAM config backends, Linux PCI driver bridge | No upstream Linux driver compiled against XIUL yet |
+| Linux drivers | Full Linux source tree | Device registry, generic PCI enumeration/BAR sizing, x86_64 CF8/CFC and ARM64 ECAM config backends, Linux PCI driver bridge and decode/bus-master controls | No upstream Linux driver compiled against XIUL yet; platform MMIO mapping, IRQ routing and DMA remain missing |
 | FreeBSD networking | Full FreeBSD source tree | Network-interface and protocol-handler dispatch boundary | FreeBSD mbuf, socket, routing and protocol stack not yet adapted or linked |
 | FreeBSD VFS/filesystems | Full FreeBSD source tree | Mount/open/read/write/close VFS and vnode contract | FreeBSD VFS/vnode/filesystem sources not yet adapted or linked |
 | POSIX | Available in imported source pools | Syscall dispatch plus per-process FD table connected to VFS | No complete process model, syscall ABI or user-memory boundary |
