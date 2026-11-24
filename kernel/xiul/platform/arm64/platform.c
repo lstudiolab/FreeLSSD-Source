@@ -14,7 +14,7 @@ static volatile uint32_t *uart_registers;
 static void serial_initialize(const xiul_boot_info_t *boot_info)
 {
     uint32_t divisor, remainder;
-    if (boot_info->uart_physical == 0 ||
+    if (boot_info->uart_virtual == 0 ||
         boot_info->uart_clock_hz == 0 ||
         boot_info->uart_baud_rate == 0) return;
 
