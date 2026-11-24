@@ -2,32 +2,37 @@
 
 FreeLSSD is the operating-system project. Its kernel is **XIUL**.
 
-## XIUL source layout
+## Kernel architecture
 
-The upstream source repositories are mounted directly inside `kernel/xiul/` as Git submodules:
+XIUL is a hybrid Mach/BSD kernel architecture with a Linux driver compatibility environment:
 
-- `kernel/xiul/xnu/` — XNU source, including its Mach implementation.
-- `kernel/xiul/linux/` — Linux kernel source, used as the source for selected driver ports.
-- `kernel/xiul/freebsd/` — FreeBSD source, used for selected networking and filesystem components.
+- **Mach** is the microkernel foundation: tasks, threads, IPC, scheduling and core machine mechanisms.
+- **BSD-derived services** provide networking, filesystems/VFS, POSIX-facing interfaces and the NKE extension ABI.
+- **Linux source** is used selectively for hardware drivers, adapted through XIUL's Linux compatibility layer.
+- **FreeLSSD Core OS (Engine)** sits above XIUL and provides system utilities and user-space services.
 
-These are real upstream source trees when checked out recursively. The parent repository records each upstream commit as a Git submodule pointer, preserving upstream history and licensing rather than copying millions of files into FreeLSSD's own Git history.
+XIUL is not three complete kernels concatenated together. It defines explicit interfaces between these subsystems and assigns one owner to core resources.
 
-## Checkout
+## Source layout
+
+The XIUL source and integration plan lives under `kernel/xiul/`:
+
+- `mach/` — selected Mach `osfmk/` source; the complete XNU tree is excluded.
+- `linux/` — Linux kernel source used as a source pool for selected drivers.
+- `freebsd/` — FreeBSD source used as a source pool for selected networking and filesystem components.
+- `core/`, `include/xiul/`, `io/` — XIUL-owned kernel contracts and integration code.
+- `compat/linux/` — Linux driver compatibility layer.
+- `bsd/net/`, `bsd/vfs/`, `bsd/posix/`, `bsd/nke/` — BSD service adapters and XIUL-owned ABI surfaces.
+
+Read [the XIUL architecture](kernel/xiul/ARCHITECTURE.md) and [the XIUL integration guide](kernel/xiul/README.md) before changing kernel source.
+
+## Source layout audit
 
 ```sh
-git clone --recurse-submodules https://github.com/lstudiolab/FreeLSSD-Source.git
-cd FreeLSSD-Source
+make -C kernel/xiul source-audit
 ```
 
-For an existing clone:
-
-```sh
-git submodule update --init --recursive
-```
-
-## Status
-
-This layout places the three upstream source trees under the XIUL directory. It does not mean their kernels have already been merged into one bootable kernel. XIUL's integration adapters, boot path, target platform and subsystem implementations remain ongoing work.
+This checks the expected directory structure only. It is not a kernel build or boot test. Do not claim XIUL is bootable until the platform layer, adapters, build system and end-to-end tests pass.
 
 ## Licensing
 
