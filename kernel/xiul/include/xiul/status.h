@@ -16,7 +16,8 @@ enum {
     XIUL_E_NOT_FOUND = -7,
     XIUL_E_CAPACITY = -8,
     XIUL_E_CYCLE = -9,
-    XIUL_E_INIT = -10
+    XIUL_E_INIT = -10,
+    XIUL_E_BUSY = -11
 };
 
 #endif
