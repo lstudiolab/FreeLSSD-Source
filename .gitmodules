@@ -1,0 +1,12 @@
+[submodule "vendor/xnu"]
+	path = vendor/xnu
+	url = https://github.com/lstudiolab/darwin-xnu.git
+	branch = main
+[submodule "vendor/linux"]
+	path = vendor/linux
+	url = https://github.com/lstudiolab/linux.git
+	branch = master
+[submodule "vendor/freebsd-src"]
+	path = vendor/freebsd-src
+	url = https://github.com/lstudiolab/freebsd-src.git
+	branch = main
