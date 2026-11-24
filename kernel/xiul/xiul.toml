@@ -1,0 +1,41 @@
+# XIUL source and integration manifest.
+# Paths are relative to this directory.
+name = "XIUL"
+version = "0.1.0"
+architecture = "hybrid-mach-bsd-linux-drivers"
+status = "integration-in-progress"
+
+[mach]
+path = "mach"
+upstream = "lstudiolab/darwin-xnu"
+upstream_subdirectory = "osfmk"
+role = "microkernel"
+include_complete_xnu = false
+
+[linux]
+path = "linux"
+upstream = "lstudiolab/linux"
+role = "selected-hardware-drivers-only"
+requires_compatibility_layer = true
+
+[bsd]
+path = "freebsd"
+upstream = "lstudiolab/freebsd-src"
+role = "selected-networking-and-filesystem-components-only"
+
+[xiul]
+core = "core"
+headers = "include/xiul"
+io = "io"
+linux_compat = "compat/linux"
+bsd_network = "bsd/net"
+bsd_vfs = "bsd/vfs"
+posix = "bsd/posix"
+nke = "bsd/nke"
+
+[interfaces]
+mach_is_foundation = true
+linux_is_driver_source_only = true
+bsd_owns_networking_and_filesystems = true
+posix_is_abi_not_kernel_source_tree = true
+nke_is_extension_abi = true
