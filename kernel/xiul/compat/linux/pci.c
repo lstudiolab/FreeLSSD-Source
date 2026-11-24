@@ -1,4 +1,5 @@
 #include "xiul/linux_pci.h"
+#include "xiul/pci.h"
 
 typedef struct {
     const xiul_linux_pci_driver_t *owner;
