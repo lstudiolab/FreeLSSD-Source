@@ -47,6 +47,7 @@ xiul_status_t xiul_subsystem_register(
         descriptor->abi_version != XIUL_ABI_VERSION ||
         descriptor->phase < XIUL_PHASE_EARLY ||
         descriptor->phase > XIUL_PHASE_LATE ||
+        descriptor->dependency_count > XIUL_SUBSYSTEM_MAX ||
         (descriptor->dependency_count != 0 && descriptor->dependencies == 0)) {
         return XIUL_E_INVALID;
     }
