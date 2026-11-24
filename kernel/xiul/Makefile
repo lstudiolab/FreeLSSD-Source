@@ -18,17 +18,33 @@ $(BUILD_DIR)/test_subsystem: core/subsystem.c tests/test_subsystem.c include/xiu
 $(BUILD_DIR)/test_stream: io/stream.c tests/test_stream.c io/stream.h include/xiul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) io/stream.c tests/test_stream.c -o $@
 
+$(BUILD_DIR)/test_net: bsd/net/net.c tests/test_net.c include/xiul/net.h include/xiul/status.h | $(BUILD_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING bsd/net/net.c tests/test_net.c -o $@
+
+$(BUILD_DIR)/test_vfs: bsd/vfs/vfs.c tests/test_vfs.c include/xiul/vfs.h include/xiul/status.h | $(BUILD_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING bsd/vfs/vfs.c tests/test_vfs.c -o $@
+
+$(BUILD_DIR)/test_posix: bsd/posix/syscall.c tests/test_posix.c include/xiul/posix.h include/xiul/status.h | $(BUILD_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING bsd/posix/syscall.c tests/test_posix.c -o $@
+
+$(BUILD_DIR)/test_nke: bsd/nke/nke.c tests/test_nke.c include/xiul/nke.h include/xiul/status.h | $(BUILD_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING bsd/nke/nke.c tests/test_nke.c -o $@
+
 $(BUILD_DIR)/test_platform: core/platform.c tests/test_platform.c include/xiul/platform.h include/xiul/boot.h include/xiul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) core/platform.c tests/test_platform.c -o $@
 
 $(BUILD_DIR)/test_device: core/device.c tests/test_device.c include/xiul/device.h include/xiul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING core/device.c tests/test_device.c -o $@
 
-test: $(BUILD_DIR)/test_subsystem $(BUILD_DIR)/test_stream $(BUILD_DIR)/test_device $(BUILD_DIR)/test_platform
+test: $(BUILD_DIR)/test_subsystem $(BUILD_DIR)/test_stream $(BUILD_DIR)/test_device $(BUILD_DIR)/test_platform $(BUILD_DIR)/test_net $(BUILD_DIR)/test_vfs $(BUILD_DIR)/test_posix $(BUILD_DIR)/test_nke
 	./$(BUILD_DIR)/test_subsystem
 	./$(BUILD_DIR)/test_stream
 	./$(BUILD_DIR)/test_device
 	./$(BUILD_DIR)/test_platform
+	./$(BUILD_DIR)/test_net
+	./$(BUILD_DIR)/test_vfs
+	./$(BUILD_DIR)/test_posix
+	./$(BUILD_DIR)/test_nke
 
 $(BUILD_DIR)/x86_64:
 	mkdir -p $@
