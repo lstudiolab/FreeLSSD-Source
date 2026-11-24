@@ -1,18 +1,18 @@
 #include <assert.h>
 #include <stdio.h>
 #include "xiul/nke.h"
-static int sequence[4], count;
+static int sequence[4], count, tokens[4];
 static xiul_nke_action_t record_pass(xiul_nke_packet_t *p, void *ctx)
-{ (void)p; sequence[count++] = (int)(uintptr_t)ctx; return XIUL_NKE_PASS; }
+{ (void)p; sequence[count++] = ctx == &tokens[1] ? 1 : ctx == &tokens[2] ? 2 : 3; return XIUL_NKE_PASS; }
 static xiul_nke_action_t record_drop(xiul_nke_packet_t *p, void *ctx)
 { (void)p; sequence[count++] = (int)(uintptr_t)ctx; return XIUL_NKE_DROP; }
 int main(void)
 {
     char data[32];
     xiul_nke_packet_t packet = {data, sizeof(data), 0x0800};
-    const xiul_nke_hook_t late = {"late", 20, record_pass, (void *)2};
-    const xiul_nke_hook_t early = {"early", 10, record_pass, (void *)1};
-    const xiul_nke_hook_t drop = {"drop", 30, record_drop, (void *)3};
+    const xiul_nke_hook_t late = {"late", 20, record_pass, &tokens[2]};
+    const xiul_nke_hook_t early = {"early", 10, record_pass, &tokens[1]};
+    const xiul_nke_hook_t drop = {"drop", 30, record_drop, &tokens[3]};
     xiul_nke_test_reset(); count = 0;
     assert(xiul_nke_register(&late) == XIUL_OK);
     assert(xiul_nke_register(&early) == XIUL_OK);
