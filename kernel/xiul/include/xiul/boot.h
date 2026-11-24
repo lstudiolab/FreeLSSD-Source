@@ -23,7 +23,7 @@ typedef struct {
     uint32_t structure_size;
     uint64_t memory_map_physical;
     uint64_t memory_map_entries;
-    uint64_t uart_physical;
+    uint64_t uart_virtual;
     uint32_t uart_clock_hz;
     uint32_t uart_baud_rate;
     uint64_t firmware_table_physical;
