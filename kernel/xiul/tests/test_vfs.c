@@ -17,7 +17,7 @@ static xiul_status_t vnode_read(xiul_vnode_t *node, uint64_t offset,
     size_t available = offset < used ? used - (size_t)offset : 0;
     size_t amount = available < length ? available : length;
     (void)node;
-    memcpy(buffer, storage + (size_t)offset, amount);
+    if (amount != 0) memcpy(buffer, storage + (size_t)offset, amount);
     *done = amount;
     return XIUL_OK;
 }
@@ -26,8 +26,10 @@ static xiul_status_t vnode_write(xiul_vnode_t *node, uint64_t offset,
 {
     size_t amount = length;
     (void)node;
-    if (offset + amount > sizeof(storage)) amount = sizeof(storage) - (size_t)offset;
-    memcpy(storage + (size_t)offset, buffer, amount);
+    if (offset >= sizeof(storage)) amount = 0;
+    else if (amount > sizeof(storage) - (size_t)offset)
+        amount = sizeof(storage) - (size_t)offset;
+    if (amount != 0) memcpy(storage + (size_t)offset, buffer, amount);
     if (offset + amount > used) used = (size_t)offset + amount;
     *done = amount;
     return XIUL_OK;
