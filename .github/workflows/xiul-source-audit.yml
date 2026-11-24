@@ -1,0 +1,23 @@
+name: XIUL source audit
+
+on:
+  push:
+    paths:
+      - "kernel/xiul/**"
+      - ".github/workflows/xiul-source-audit.yml"
+  pull_request:
+    paths:
+      - "kernel/xiul/**"
+      - ".github/workflows/xiul-source-audit.yml"
+  workflow_dispatch:
+
+jobs:
+  source-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out FreeLSSD
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Verify XIUL source layout
+        run: make -C kernel/xiul source-audit
