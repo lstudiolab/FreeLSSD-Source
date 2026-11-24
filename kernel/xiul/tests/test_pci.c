@@ -135,10 +135,8 @@ int main(void)
     assert(found == 1 && xiul_pci_device_count() == 1);
     assert(probed == 1 && fake.maps == 1);
     assert((fake.config[1] & 0xffffu) == 0x0007u);
-    assert((fake.config[1] & 0xffffu) == 0x0003u);
     assert(xiul_pci_remove_all() == XIUL_OK);
     assert(removed == 1 && fake.unmaps == 1);
-    assert((fake.config[1] & 0xffffu) == 0x0003u);
     assert((fake.config[1] & 0xffffu) == 0x0003u);
     assert(xiul_linux_pci_unregister_driver(&driver) == XIUL_OK);
     assert(xiul_linux_pci_driver_count() == 0);
