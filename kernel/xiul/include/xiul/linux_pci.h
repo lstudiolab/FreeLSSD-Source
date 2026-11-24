@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "xiul/device.h"
+#include "xiul/pci.h"
 
 #define XIUL_LINUX_PCI_BAR_COUNT 6u
 #define XIUL_LINUX_PCI_BAR_IO (1u << 0)
@@ -19,14 +20,13 @@ typedef struct {
 } xiul_linux_pci_id_t;
 
 /* The XIUL device is first so the registry callback can recover this object. */
-struct xiul_pci_host;
 typedef struct {
     xiul_device_t device;
     char name_storage[24];
     uint8_t bus_number;
     uint8_t device_number;
     uint8_t function_number;
-    const struct xiul_pci_host *host;
+    const xiul_pci_host_t *host;
     uint16_t original_command;
     uint8_t bar_flags[XIUL_LINUX_PCI_BAR_COUNT];
     uint64_t bar_start[XIUL_LINUX_PCI_BAR_COUNT];
