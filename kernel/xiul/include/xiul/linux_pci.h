@@ -4,7 +4,11 @@
 #include <stdint.h>
 #include "xiul/device.h"
 
-#define XIUL_LINUX_PCI_BAR_COUNT 6u\n#define XIUL_LINUX_PCI_BAR_IO (1u << 0)\n#define XIUL_LINUX_PCI_BAR_MEMORY (1u << 1)\n#define XIUL_LINUX_PCI_BAR_PREFETCHABLE (1u << 2)\n#define XIUL_LINUX_PCI_BAR_64BIT (1u << 3)
+#define XIUL_LINUX_PCI_BAR_COUNT 6u
+#define XIUL_LINUX_PCI_BAR_IO (1u << 0)
+#define XIUL_LINUX_PCI_BAR_MEMORY (1u << 1)
+#define XIUL_LINUX_PCI_BAR_PREFETCHABLE (1u << 2)
+#define XIUL_LINUX_PCI_BAR_64BIT (1u << 3)
 #define XIUL_LINUX_PCI_DRIVER_MAX 32u
 
 typedef struct {
@@ -21,7 +25,10 @@ typedef struct {
     uint8_t bus_number;
     uint8_t device_number;
     uint8_t function_number;
-    const struct xiul_pci_host *host;\n    uint16_t original_command;\n    uint8_t bar_flags[XIUL_LINUX_PCI_BAR_COUNT];\n    uint64_t bar_start[XIUL_LINUX_PCI_BAR_COUNT];
+    const struct xiul_pci_host *host;
+    uint16_t original_command;
+    uint8_t bar_flags[XIUL_LINUX_PCI_BAR_COUNT];
+    uint64_t bar_start[XIUL_LINUX_PCI_BAR_COUNT];
     uint64_t bar_length[XIUL_LINUX_PCI_BAR_COUNT];
     volatile void *bar_mapping[XIUL_LINUX_PCI_BAR_COUNT];
     uint32_t irq;
@@ -41,7 +48,9 @@ typedef struct {
 xiul_status_t xiul_linux_pci_register_driver(const xiul_linux_pci_driver_t *driver);
 xiul_status_t xiul_linux_pci_unregister_driver(const xiul_linux_pci_driver_t *driver);
 xiul_status_t xiul_linux_pci_enable_device(xiul_linux_pci_device_t *device);
-void xiul_linux_pci_disable_device(xiul_linux_pci_device_t *device);\nxiul_status_t xiul_linux_pci_set_master(xiul_linux_pci_device_t *device);\nvoid xiul_linux_pci_clear_master(xiul_linux_pci_device_t *device);
+void xiul_linux_pci_disable_device(xiul_linux_pci_device_t *device);
+xiul_status_t xiul_linux_pci_set_master(xiul_linux_pci_device_t *device);
+void xiul_linux_pci_clear_master(xiul_linux_pci_device_t *device);
 uint64_t xiul_linux_pci_resource_start(const xiul_linux_pci_device_t *device, unsigned int bar);
 uint64_t xiul_linux_pci_resource_length(const xiul_linux_pci_device_t *device, unsigned int bar);
 volatile void *xiul_linux_pci_iomap(const xiul_linux_pci_device_t *device, unsigned int bar);
