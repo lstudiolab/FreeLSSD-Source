@@ -20,7 +20,7 @@ int main(void)
     packet.length = 1501;
     assert(xiul_net_transmit(&nic, &packet) == XIUL_E_INVALID);
     assert(xiul_netif_unregister(&nic) == XIUL_OK);
-    assert(xiul_net_receive(&nic, &packet) == XIUL_E_INVALID);
+    assert(xiul_net_receive(&nic, &packet) == XIUL_E_NOT_FOUND);
     xiul_net_test_reset();
     puts("XIUL network interface tests: PASS");
     return 0;
