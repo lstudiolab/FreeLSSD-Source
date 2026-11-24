@@ -33,6 +33,9 @@ int main(void)
     info.memory_map_physical = 0;
     assert(xiul_platform_initialize(&info) == XIUL_E_INVALID);
     assert(arch_calls == 0);
+    info.memory_map_entries = UINT64_MAX / sizeof(xiul_memory_region_t) + 1u;
+    info.memory_map_physical = 0x1000;
+    assert(xiul_platform_initialize(&info) == XIUL_E_INVALID);
     info.memory_map_entries = 0;
     assert(xiul_platform_initialize(&info) == XIUL_OK);
     assert(arch_calls == 1);
