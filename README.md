@@ -26,13 +26,14 @@ The XIUL source and integration plan lives under `kernel/xiul/`:
 
 Read [the XIUL architecture](kernel/xiul/ARCHITECTURE.md) and [the XIUL integration guide](kernel/xiul/README.md) before changing kernel source.
 
-## Source layout audit
+## XIUL development checks
 
 ```sh
 make -C kernel/xiul source-audit
+make -C kernel/xiul test
 ```
 
-This checks the expected directory structure only. It is not a kernel build or boot test. Do not claim XIUL is bootable until the platform layer, adapters, build system and end-to-end tests pass.
+The host tests cover the XIUL subsystem lifecycle manager, I/O stream primitive and device/driver registry. They do not build the imported upstream kernels or prove that XIUL boots. The Mach platform port, Linux driver compatibility APIs, BSD networking/filesystem adapters, POSIX/NKE implementations and end-to-end hardware tests remain integration work.
 
 ## Licensing
 
