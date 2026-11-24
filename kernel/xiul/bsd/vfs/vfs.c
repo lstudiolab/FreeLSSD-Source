@@ -148,7 +148,8 @@ xiul_status_t xiul_vfs_read(xiul_file_t *file, void *buffer, size_t length,
     status = file->vnode.operations->read(&file->vnode, file->offset,
                                            buffer, length, &amount);
     if (status != XIUL_OK) return status;
-    if (amount > length) return XIUL_E_STATE;
+    if (amount > length || UINT64_MAX - file->offset < amount)
+        return XIUL_E_STATE;
     file->offset += amount;
     *transferred = amount;
     return XIUL_OK;
