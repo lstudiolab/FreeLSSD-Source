@@ -66,6 +66,6 @@ make -C kernel/xiul source-audit
 make -C kernel/xiul test
 ```
 
-The host test suite validates the XIUL subsystem lifecycle manager, I/O ring stream and device/driver registry. These tests do not compile the upstream Mach, Linux or FreeBSD kernels and do not create a bootable XIUL image.
+The host test suite validates the subsystem lifecycle manager, I/O ring stream, device/driver registry, Linux PCI adapter bridge, boot handoff validator, network-interface dispatch, VFS mount lifecycle, POSIX syscall dispatch and NKE packet hooks. CI also cross-compiles the XIUL-owned x86_64 and AArch64 platform objects. These checks do not compile the imported upstream Mach, Linux or FreeBSD kernel source trees and do not create a bootable XIUL image.
 
-The imported upstream trees still require dependency audits and architecture-specific ports. XIUL must not be described as bootable until platform startup, Mach dependency adapters, Linux driver shims, BSD adapters, linker/build rules and end-to-end boot tests work together on a named target.
+The imported upstream trees still require dependency audits and architecture-specific ports. The current platform code is early CPU/console/interrupt glue only. XIUL must not be described as bootable until the boot protocol, entry assembly, Mach dependency adapters, VM/interrupt-controller/SMP bring-up, Linux driver shims, BSD stack ports, linker/build rules and end-to-end boot tests work together on both targets.
