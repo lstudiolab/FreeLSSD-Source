@@ -5,7 +5,7 @@ static int sequence[4], count, tokens[4];
 static xiul_nke_action_t record_pass(xiul_nke_packet_t *p, void *ctx)
 { (void)p; sequence[count++] = ctx == &tokens[1] ? 1 : ctx == &tokens[2] ? 2 : 3; return XIUL_NKE_PASS; }
 static xiul_nke_action_t record_drop(xiul_nke_packet_t *p, void *ctx)
-{ (void)p; sequence[count++] = (int)(uintptr_t)ctx; return XIUL_NKE_DROP; }
+{ (void)p; sequence[count++] = ctx == &tokens[1] ? 1 : ctx == &tokens[2] ? 2 : 3; return XIUL_NKE_DROP; }
 int main(void)
 {
     char data[32];
