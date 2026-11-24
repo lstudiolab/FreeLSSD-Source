@@ -1,9 +1,9 @@
 #ifndef XIUL_SUBSYSTEM_H
 #define XIUL_SUBSYSTEM_H
 
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "xiul/status.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -11,16 +11,7 @@ extern "C" {
 
 #define XIUL_ABI_VERSION 1u
 #define XIUL_SUBSYSTEM_NAME_MAX 48u
-
-typedef enum {
-    XIUL_OK = 0,
-    XIUL_E_INVALID = -1,
-    XIUL_E_DUPLICATE = -2,
-    XIUL_E_DEPENDENCY = -3,
-    XIUL_E_STATE = -4,
-    XIUL_E_UNSUPPORTED = -5,
-    XIUL_E_NOMEM = -6
-} xiul_status_t;
+#define XIUL_SUBSYSTEM_MAX 64u
 
 typedef enum {
     XIUL_PHASE_EARLY = 0,
@@ -32,14 +23,8 @@ typedef enum {
 } xiul_init_phase_t;
 
 typedef struct xiul_kernel_context xiul_kernel_context_t;
-
-typedef xiul_status_t (*xiul_subsystem_init_fn)(
-    xiul_kernel_context_t *context
-);
-
-typedef void (*xiul_subsystem_shutdown_fn)(
-    xiul_kernel_context_t *context
-);
+typedef xiul_status_t (*xiul_subsystem_init_fn)(xiul_kernel_context_t *context);
+typedef void (*xiul_subsystem_shutdown_fn)(xiul_kernel_context_t *context);
 
 typedef struct {
     uint32_t abi_version;
@@ -51,26 +36,17 @@ typedef struct {
     xiul_subsystem_shutdown_fn shutdown;
 } xiul_subsystem_descriptor_t;
 
-/*
- * Descriptors are immutable and must remain alive for the kernel lifetime.
- * Registration and lifecycle execution are provided by the XIUL core.
- */
-xiul_status_t xiul_subsystem_register(
-    const xiul_subsystem_descriptor_t *descriptor
-);
-
+xiul_status_t xiul_subsystem_register(const xiul_subsystem_descriptor_t *descriptor);
 xiul_status_t xiul_subsystem_validate(void);
+xiul_status_t xiul_subsystem_start_all(xiul_kernel_context_t *context);
+void xiul_subsystem_stop_all(xiul_kernel_context_t *context);
+size_t xiul_subsystem_count(void);
 
-xiul_status_t xiul_subsystem_start_all(
-    xiul_kernel_context_t *context
-);
-
-void xiul_subsystem_stop_all(
-    xiul_kernel_context_t *context
-);
+#ifdef XIUL_TESTING
+void xiul_subsystem_test_reset(void);
+#endif
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif
