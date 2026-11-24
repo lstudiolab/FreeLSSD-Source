@@ -37,7 +37,7 @@ typedef struct xiul_device {
     const struct xiul_driver *bound_driver;
 } xiul_device_t;
 
-typedef struct xiul_driver {
+typedef xiul_status_t (*xiul_driver_probe_context_fn)(xiul_device_t *, void *);\ntypedef void (*xiul_driver_remove_context_fn)(xiul_device_t *, void *);\n\ntypedef struct xiul_driver {
     const char *name;
     const xiul_device_id_t *id_table;
     size_t id_count;
