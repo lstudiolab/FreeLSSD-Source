@@ -1,38 +1,34 @@
 # FreeLSSD
 
-FreeLSSD is the operating-system project. Its kernel project is **XIUL**.
+FreeLSSD is the operating-system project. Its kernel is **XIUL**.
 
-## XIUL Kernel
+## XIUL source layout
 
-XIUL is a hybrid-kernel integration project built around three upstream codebases:
+The upstream source repositories are mounted directly inside `kernel/xiul/` as Git submodules:
 
-- **Mach / XNU** — the initial low-level kernel foundation and Mach interfaces.
-- **Linux** — selected Linux device drivers, imported through explicit compatibility adapters.
-- **FreeBSD** — selected BSD kernel services, networking and filesystem components, integrated behind XIUL-owned interfaces.
+- `kernel/xiul/xnu/` — XNU source, including its Mach implementation.
+- `kernel/xiul/linux/` — Linux kernel source, used as the source for selected driver ports.
+- `kernel/xiul/freebsd/` — FreeBSD source, used for selected networking and filesystem components.
 
-These codebases are tracked as Git submodules. They are not copied into this repository, and their original histories and licenses remain intact.
-
-See [the XIUL architecture](kernel/xiul/ARCHITECTURE.md) before changing subsystem boundaries.
+These are real upstream source trees when checked out recursively. The parent repository records each upstream commit as a Git submodule pointer, preserving upstream history and licensing rather than copying millions of files into FreeLSSD's own Git history.
 
 ## Checkout
-
-Clone with all source dependencies:
 
 ```sh
 git clone --recurse-submodules https://github.com/lstudiolab/FreeLSSD-Source.git
 cd FreeLSSD-Source
 ```
 
-If the repository was cloned without submodules:
+For an existing clone:
 
 ```sh
 git submodule update --init --recursive
 ```
 
-## Current status
+## Status
 
-This commit establishes the source layout, pinned upstream dependencies, subsystem contracts and architecture rules. It is **not yet a bootable or merged kernel**. Porting, adapter implementations, a target platform, a boot path and hardware testing remain required.
+This layout places the three upstream source trees under the XIUL directory. It does not mean their kernels have already been merged into one bootable kernel. XIUL's integration adapters, boot path, target platform and subsystem implementations remain ongoing work.
 
 ## Licensing
 
-FreeLSSD's own files are covered by the repository's top-level license unless a file says otherwise. Third-party source remains under its original license. Read each upstream license before copying, modifying, linking or redistributing its code.
+Third-party source retains its original license and notices. Review the license of every file and component before importing, linking, modifying or redistributing it.

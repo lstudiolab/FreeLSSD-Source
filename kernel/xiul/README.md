@@ -1,27 +1,31 @@
 # XIUL Kernel
 
-XIUL is the kernel integration layer for FreeLSSD. It owns the stable interfaces between the Mach foundation, imported driver code, BSD services and the hardware platform.
+The upstream source trees are located directly in this directory:
 
-## Source dependencies
-
-| Component | Repository path | Intended responsibility |
+| Directory | Source | Intended role |
 |---|---|---|
-| XNU / Mach | `vendor/xnu` | Mach-derived low-level primitives and reference implementation |
-| Linux | `vendor/linux` | Selected device drivers through XIUL driver adapters |
-| FreeBSD | `vendor/freebsd-src` | Selected networking and filesystem services through XIUL service adapters |
+| `xnu/` | [lstudiolab/darwin-xnu](https://github.com/lstudiolab/darwin-xnu) | Mach foundation and XNU reference implementation |
+| `linux/` | [lstudiolab/linux](https://github.com/lstudiolab/linux) | Selected Linux device-driver source |
+| `freebsd/` | [lstudiolab/freebsd-src](https://github.com/lstudiolab/freebsd-src) | Selected BSD networking and filesystem source |
 
-The source trees are upstream references and integration inputs. XIUL must not assume that a subsystem can be compiled independently merely because its source directory exists.
+Initialize all source trees with:
 
-## Rules
+```sh
+git submodule update --init --recursive
+```
 
-1. XIUL owns its public kernel interfaces; imported code must adapt to them.
-2. There is one owner for physical memory, virtual memory, scheduling, interrupts and device lifecycle on a given target. Do not run three competing implementations of the same global resource manager.
-3. Linux drivers must use a Linux-compatibility layer. Do not expose Linux internal structures as XIUL's public ABI.
-4. BSD networking and filesystem code must use explicit shims for allocation, locking, timers, mbufs/buffers, VFS objects and device access.
-5. Mach code must be audited for XNU dependencies (pmap, IPC, task/thread, zone allocator, locks, machine layer and platform expert). Do not treat `osfmk` as a standalone drop-in kernel.
-6. Preserve upstream copyright notices, license files and provenance for every imported file.
-7. Never silently replace an upstream subsystem with a stub and call it implemented.
+## Integration policy
 
-## Status
+XIUL is not a concatenation of three complete kernels. It owns stable interfaces between the Mach-derived foundation, imported driver code, BSD services and the hardware platform.
 
-The initial integration contract is documented. The runtime adapters, boot sequence, target-specific machine layer and end-to-end kernel build are not implemented yet.
+- One owner per target for physical memory, virtual memory, scheduling, interrupts, clocks and device lifecycle.
+- Linux drivers must be adapted through a Linux compatibility layer.
+- FreeBSD networking and filesystem components must be adapted through explicit XIUL interfaces for memory, locks, timers, buffers, VFS and devices.
+- XNU's `osfmk` is not standalone; Mach code depends on XNU platform and supporting subsystems.
+- POSIX is an interface contract, not a source directory to merge.
+- NKE is a kernel-extension interface, not a replacement network stack.
+- Preserve upstream provenance, copyright notices and license files.
+
+## Current status
+
+The source trees are placed under this directory as submodules. The XIUL subsystem contract and architecture are documented, but the adapters, boot sequence, platform layer and end-to-end kernel build are not yet implemented.
