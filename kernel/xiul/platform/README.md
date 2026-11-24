@@ -7,7 +7,7 @@ This directory is XIUL-owned glue; it does not replace the imported Mach machine
 - `x86_64`: privileged CPU/interrupt primitives and a bounded-timeout 16550 COM1 console.
 - `arm64`: DAIF interrupt masking, MPIDR CPU identification, WFE/YIELD idle primitives and a boot-information-configured PL011 console.
 
-Both targets use the common `xiul_boot_info_t` hand-off contract. Physical addresses in the hand-off are not automatically mapped: the architecture entry code and Mach VM bootstrap must establish mappings before dereferencing them.
+Both targets use the common `xiul_boot_info_t` hand-off contract. Memory-map and firmware-table addresses are physical. The UART address is a virtual address that must already be mapped by the bootloader/entry path before early console use.
 
 ## Current limitations
 
