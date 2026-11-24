@@ -105,6 +105,7 @@ static xiul_status_t probe_bar(const xiul_pci_host_t *host,
         mask_low &= ~UINT32_C(3);
         if (mask_low != 0) {
             length = (uint32_t)(~mask_low + 1u);
+            pci->bar_flags[bar] = XIUL_LINUX_PCI_BAR_IO;
             pci->bar_start[bar] = base;
             pci->bar_length[bar] = length;
         }
@@ -112,9 +113,6 @@ static xiul_status_t probe_bar(const xiul_pci_host_t *host,
     }
 
     type = (original_low >> 1) & 3u;
-    pci->bar_flags[bar] = XIUL_LINUX_PCI_BAR_MEMORY;
-    if ((original_low & 8u) != 0) pci->bar_flags[bar] |= XIUL_LINUX_PCI_BAR_PREFETCHABLE;
-    if (type == 2u) pci->bar_flags[bar] |= XIUL_LINUX_PCI_BAR_64BIT;
     if (type == 3u) return XIUL_E_UNSUPPORTED;
     if (type == 2u) {
         if (bar + 1u >= XIUL_LINUX_PCI_BAR_COUNT) return XIUL_E_INVALID;
@@ -157,6 +155,11 @@ static xiul_status_t probe_bar(const xiul_pci_host_t *host,
         length = (uint32_t)(~mask + 1u);
     }
     if (length == 0) return XIUL_OK;
+    pci->bar_flags[bar] = XIUL_LINUX_PCI_BAR_MEMORY;
+    if ((original_low & 8u) != 0)
+        pci->bar_flags[bar] |= XIUL_LINUX_PCI_BAR_PREFETCHABLE;
+    if (type == 2u)
+        pci->bar_flags[bar] |= XIUL_LINUX_PCI_BAR_64BIT;
     pci->bar_start[bar] = base;
     pci->bar_length[bar] = length;
     if (host->map_mmio != 0 && length <= (uint64_t)SIZE_MAX)
