@@ -1,20 +1,35 @@
-# XIUL integration source audit.
-# This target verifies layout only; it does not claim to build or boot XIUL.
+# XIUL host-side core tests and source-layout validation.
+# Upstream Mach/Linux/FreeBSD kernel builds are separate porting tasks.
+CC ?= cc
+BUILD_DIR ?= .build
+CPPFLAGS += -Iinclude
+CFLAGS ?= -std=c11 -O2 -Wall -Wextra -Werror -pedantic
 
-XIUL_ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-REQUIRED_DIRS := mach linux freebsd core include/xiul io compat/linux bsd/net bsd/vfs bsd/posix bsd/nke
+.PHONY: all test source-audit clean
+all: test
 
-.PHONY: source-audit
+$(BUILD_DIR):
+	mkdir -p $@
+
+$(BUILD_DIR)/test_subsystem: core/subsystem.c tests/test_subsystem.c include/xiul/subsystem.h include/xiul/status.h | $(BUILD_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING core/subsystem.c tests/test_subsystem.c -o $@
+
+test: $(BUILD_DIR)/test_subsystem
+	./$(BUILD_DIR)/test_subsystem
+
 source-audit:
 	@set -eu; \
-	for path in $(REQUIRED_DIRS); do \
-		if [ ! -d "$(XIUL_ROOT)$$path" ]; then \
-			echo "XIUL source-audit: missing $$path"; \
-			exit 1; \
-		fi; \
+	for path in mach linux freebsd core include/xiul io compat/linux bsd/net bsd/vfs bsd/posix bsd/nke tests; do \
+		test -d "$(CURDIR)/$$path" || { echo "missing XIUL source root: $$path"; exit 1; }; \
 	done
-	@test -f "$(XIUL_ROOT)xiul.toml"
-	@test -f "$(XIUL_ROOT)README.md"
-	@test -f "$(XIUL_ROOT)ARCHITECTURE.md"
-	@echo "XIUL source-audit: source roots and integration layout present."
-	@echo "This is a layout check, not a kernel build or boot test."
+	@test -f xiul.toml
+	@test -f README.md
+	@test -f ARCHITECTURE.md
+	@test -f UPSTREAM-SOURCES.txt
+	@grep -q '^mach-osfmk ' UPSTREAM-SOURCES.txt
+	@grep -q '^linux ' UPSTREAM-SOURCES.txt
+	@grep -q '^freebsd ' UPSTREAM-SOURCES.txt
+	@echo "XIUL source audit: PASS"
+
+clean:
+	rm -rf $(BUILD_DIR)
