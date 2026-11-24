@@ -11,6 +11,7 @@ extern "C" {
 
 #define XIUL_DEVICE_MAX 128u
 #define XIUL_DRIVER_MAX 64u
+#define XIUL_DRIVER_ID_MAX 32u
 #define XIUL_ID_ANY UINT16_MAX
 
 typedef enum {
