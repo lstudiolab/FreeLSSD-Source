@@ -3,6 +3,9 @@
 static xiul_netif_t *interfaces[XIUL_NETIF_MAX];
 static size_t interface_count;
 static xiul_net_input_fn input_handler;
+typedef struct { uint16_t protocol; xiul_net_protocol_fn handler; } xiul_protocol_entry_t;
+static xiul_protocol_entry_t protocols[XIUL_NET_PROTOCOL_MAX];
+static size_t protocol_count;
 
 static int name_equal(const char *a, const char *b)
 {
@@ -24,6 +27,46 @@ xiul_status_t xiul_net_set_input_handler(xiul_net_input_fn handler)
 {
     input_handler = handler;
     return XIUL_OK;
+}
+
+xiul_status_t xiul_net_protocol_register(uint16_t protocol, xiul_net_protocol_fn handler)
+{
+    size_t i;
+    if (protocol == 0 || handler == 0) return XIUL_E_INVALID;
+    for (i = 0; i < protocol_count; ++i)
+        if (protocols[i].protocol == protocol) return XIUL_E_DUPLICATE;
+    if (protocol_count == XIUL_NET_PROTOCOL_MAX) return XIUL_E_CAPACITY;
+    protocols[protocol_count].protocol = protocol;
+    protocols[protocol_count].handler = handler;
+    ++protocol_count;
+    return XIUL_OK;
+}
+
+xiul_status_t xiul_net_protocol_unregister(uint16_t protocol)
+{
+    size_t i;
+    for (i = 0; i < protocol_count; ++i) {
+        if (protocols[i].protocol != protocol) continue;
+        for (; i + 1 < protocol_count; ++i) protocols[i] = protocols[i + 1];
+        --protocol_count;
+        protocols[protocol_count].protocol = 0;
+        protocols[protocol_count].handler = 0;
+        return XIUL_OK;
+    }
+    return XIUL_E_NOT_FOUND;
+}
+
+xiul_status_t xiul_net_protocol_dispatch(xiul_netif_t *interface,
+                                          xiul_net_packet_t *packet)
+{
+    size_t i;
+    if (interface == 0 || packet == 0 || packet->data == 0 || packet->length == 0)
+        return XIUL_E_INVALID;
+    if (!is_registered(interface)) return XIUL_E_NOT_FOUND;
+    for (i = 0; i < protocol_count; ++i)
+        if (protocols[i].protocol == packet->protocol)
+            return protocols[i].handler(interface, packet);
+    return XIUL_E_UNSUPPORTED;
 }
 
 xiul_status_t xiul_netif_register(xiul_netif_t *interface)
@@ -58,8 +101,8 @@ xiul_status_t xiul_net_receive(xiul_netif_t *interface, xiul_net_packet_t *packe
     if (interface == 0 || packet == 0 || packet->data == 0 || packet->length == 0)
         return XIUL_E_INVALID;
     if (!is_registered(interface)) return XIUL_E_NOT_FOUND;
-    if (input_handler == 0) return XIUL_E_STATE;
-    return input_handler(interface, packet);
+    if (input_handler != 0) return input_handler(interface, packet);
+    return xiul_net_protocol_dispatch(interface, packet);
 }
 
 xiul_status_t xiul_net_transmit(xiul_netif_t *interface, xiul_net_packet_t *packet)
@@ -80,5 +123,6 @@ void xiul_net_test_reset(void)
     for (i = 0; i < interface_count; ++i) interfaces[i] = 0;
     interface_count = 0;
     input_handler = 0;
+    for (i = 0; i < protocol_count; ++i) {\n        protocols[i].protocol = 0;\n        protocols[i].handler = 0;\n    }\n    protocol_count = 0;
 }
 #endif
