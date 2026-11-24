@@ -59,6 +59,8 @@ static void release_slot(xiul_pci_slot_t *slot)
         (void)xiul_device_unregister(&slot->pci.device);
     else if (slot->pci.device.name != 0)
         (void)xiul_device_unregister(&slot->pci.device);
+    xiul_linux_pci_clear_master(&slot->pci);
+    xiul_linux_pci_disable_device(&slot->pci);
     if (slot->host != 0 && slot->host->unmap_mmio != 0) {
         for (i = 0; i < XIUL_LINUX_PCI_BAR_COUNT; ++i) {
             if (slot->pci.bar_mapping[i] != 0 && slot->pci.bar_length[i] <= (uint64_t)SIZE_MAX) {
