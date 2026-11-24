@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "stream.h"
 
 static size_t copy_into_ring(uint8_t *ring, size_t capacity, size_t position,
@@ -25,7 +26,7 @@ static size_t copy_from_ring(uint8_t *destination, const uint8_t *ring,
 xiul_status_t xiul_ring_stream_init(xiul_ring_stream_t *stream,
                                     uint8_t *storage, size_t capacity)
 {
-    if (stream == 0 || storage == 0 || capacity == 0) return XIUL_E_INVALID;
+    if (stream == 0 || storage == 0 || capacity == 0 || capacity > SIZE_MAX / 2) return XIUL_E_INVALID;
     stream->storage = storage;
     stream->capacity = capacity;
     atomic_init(&stream->head, 0);
