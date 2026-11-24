@@ -1,11 +1,6 @@
 name: Import XIUL upstream source
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/import-xiul-sources.yml"
-      - "scripts/import-xiul-sources.sh"
   workflow_dispatch:
 
 permissions:
@@ -23,8 +18,7 @@ jobs:
       - name: Check out FreeLSSD
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Import forked source trees into kernel/xiul
         run: bash scripts/import-xiul-sources.sh
