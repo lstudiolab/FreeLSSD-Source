@@ -6,6 +6,7 @@ typedef struct {
     xiul_driver_t bridge;
 } xiul_linux_pci_registration_t;
 
+/* Slots never move: XIUL stores pointers to each bridge and its context. */
 static xiul_linux_pci_registration_t registrations[XIUL_LINUX_PCI_DRIVER_MAX];
 static size_t registration_count;
 
@@ -42,23 +43,25 @@ static void bridge_remove(xiul_device_t *device, void *context)
 {
     xiul_linux_pci_registration_t *registration =
         (xiul_linux_pci_registration_t *)context;
-    if (registration->owner->remove != 0)
+    if (registration->owner != 0 && registration->owner->remove != 0)
         registration->owner->remove((xiul_linux_pci_device_t *)device);
 }
 
 xiul_status_t xiul_linux_pci_register_driver(const xiul_linux_pci_driver_t *driver)
 {
-    xiul_linux_pci_registration_t *registration;
+    xiul_linux_pci_registration_t *registration = 0;
     size_t i;
     xiul_status_t status;
     if (driver == 0 || driver->name == 0 || driver->name[0] == '\0' ||
         driver->id_table == 0 || driver->id_count == 0 ||
         driver->id_count > XIUL_DRIVER_ID_MAX || driver->probe == 0)
         return XIUL_E_INVALID;
-    for (i = 0; i < registration_count; ++i)
+    for (i = 0; i < XIUL_LINUX_PCI_DRIVER_MAX; ++i) {
         if (registrations[i].owner == driver) return XIUL_E_DUPLICATE;
-    if (registration_count == XIUL_LINUX_PCI_DRIVER_MAX) return XIUL_E_CAPACITY;
-    registration = &registrations[registration_count];
+        if (registration == 0 && registrations[i].owner == 0)
+            registration = &registrations[i];
+    }
+    if (registration == 0) return XIUL_E_CAPACITY;
     registration->owner = driver;
     for (i = 0; i < driver->id_count; ++i) {
         registration->ids[i].bus = XIUL_BUS_PCI;
@@ -73,13 +76,12 @@ xiul_status_t xiul_linux_pci_register_driver(const xiul_linux_pci_driver_t *driv
     registration->bridge.context = registration;
     registration->bridge.probe_context = bridge_probe;
     registration->bridge.remove_context = bridge_remove;
-    ++registration_count;
     status = xiul_driver_register(&registration->bridge);
     if (status != XIUL_OK) {
-        --registration_count;
         registration->owner = 0;
         return status;
     }
+    ++registration_count;
     return XIUL_OK;
 }
 
@@ -88,15 +90,13 @@ xiul_status_t xiul_linux_pci_unregister_driver(const xiul_linux_pci_driver_t *dr
     size_t i;
     xiul_status_t status;
     if (driver == 0) return XIUL_E_INVALID;
-    for (i = 0; i < registration_count; ++i) {
+    for (i = 0; i < XIUL_LINUX_PCI_DRIVER_MAX; ++i) {
         xiul_linux_pci_registration_t *registration = &registrations[i];
         if (registration->owner != driver) continue;
         status = xiul_driver_unregister(&registration->bridge);
         if (status != XIUL_OK) return status;
-        for (; i + 1 < registration_count; ++i)
-            registrations[i] = registrations[i + 1];
+        registration->owner = 0;
         --registration_count;
-        registrations[registration_count].owner = 0;
         return XIUL_OK;
     }
     return XIUL_E_NOT_FOUND;
@@ -146,11 +146,14 @@ size_t xiul_linux_pci_driver_count(void) { return registration_count; }
 #ifdef XIUL_TESTING
 void xiul_linux_pci_test_reset(void)
 {
-    while (registration_count != 0) {
-        xiul_linux_pci_registration_t *r = &registrations[registration_count - 1];
-        (void)xiul_driver_unregister(&r->bridge);
-        r->owner = 0;
-        --registration_count;
+    size_t i;
+    for (i = 0; i < XIUL_LINUX_PCI_DRIVER_MAX; ++i) {
+        xiul_linux_pci_registration_t *r = &registrations[i];
+        if (r->owner != 0) {
+            (void)xiul_driver_unregister(&r->bridge);
+            r->owner = 0;
+        }
     }
+    registration_count = 0;
 }
 #endif
