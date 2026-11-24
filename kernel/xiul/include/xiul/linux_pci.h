@@ -17,6 +17,10 @@ typedef struct {
 /* The XIUL device is first so the registry callback can recover this object. */
 typedef struct {
     xiul_device_t device;
+    char name_storage[24];
+    uint8_t bus_number;
+    uint8_t device_number;
+    uint8_t function_number;
     uint64_t bar_start[XIUL_LINUX_PCI_BAR_COUNT];
     uint64_t bar_length[XIUL_LINUX_PCI_BAR_COUNT];
     volatile void *bar_mapping[XIUL_LINUX_PCI_BAR_COUNT];
