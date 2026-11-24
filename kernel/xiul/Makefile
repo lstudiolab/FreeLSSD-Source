@@ -37,7 +37,7 @@ $(BUILD_DIR)/test_posix: bsd/posix/syscall.c tests/test_posix.c include/xiul/pos
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING bsd/posix/syscall.c tests/test_posix.c -o $@
 
 $(BUILD_DIR)/test_posix_vfs: bsd/vfs/vfs.c bsd/posix/fd.c tests/test_posix_vfs.c include/xiul/vfs.h include/xiul/posix.h include/xiul/status.h | $(BUILD_DIR)
-	$(CC) $(CPPFLAGS) $(CFLAGS) bsd/vfs/vfs.c bsd/posix/fd.c tests/test_posix_vfs.c -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING bsd/vfs/vfs.c bsd/posix/fd.c tests/test_posix_vfs.c -o $@
 
 $(BUILD_DIR)/test_nke: bsd/nke/nke.c tests/test_nke.c include/xiul/nke.h include/xiul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING bsd/nke/nke.c tests/test_nke.c -o $@
