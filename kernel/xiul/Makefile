@@ -17,9 +17,13 @@ $(BUILD_DIR)/test_subsystem: core/subsystem.c tests/test_subsystem.c include/xiu
 $(BUILD_DIR)/test_stream: io/stream.c tests/test_stream.c io/stream.h include/xiul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) io/stream.c tests/test_stream.c -o $@
 
-test: $(BUILD_DIR)/test_subsystem $(BUILD_DIR)/test_stream
+$(BUILD_DIR)/test_device: core/device.c tests/test_device.c include/xiul/device.h include/xiul/status.h | $(BUILD_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING core/device.c tests/test_device.c -o $@
+
+test: $(BUILD_DIR)/test_subsystem $(BUILD_DIR)/test_stream $(BUILD_DIR)/test_device
 	./$(BUILD_DIR)/test_subsystem
 	./$(BUILD_DIR)/test_stream
+	./$(BUILD_DIR)/test_device
 
 source-audit:
 	@set -eu; \
