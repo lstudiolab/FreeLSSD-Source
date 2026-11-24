@@ -25,16 +25,40 @@ import_tree() {
   echo "::endgroup::"
 }
 
+import_mach() {
+  local url="https://github.com/lstudiolab/darwin-xnu.git"
+  local branch="main"
+  local destination="$ROOT/kernel/xiul/mach"
+
+  echo "::group::Importing Mach (XNU osfmk only)"
+  git clone --depth 1 --single-branch --branch "$branch" "$url" "$TMP/xnu"
+  local source_commit
+  source_commit="$(git -C "$TMP/xnu" rev-parse HEAD)"
+  echo "Mach source commit: $source_commit"
+
+  test -d "$TMP/xnu/osfmk" || {
+    echo "Expected Mach source directory osfmk/ was not found." >&2
+    exit 1
+  }
+
+  mkdir -p "$destination"
+  find "$destination" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+  tar -C "$TMP/xnu/osfmk" -cf - . | tar -C "$destination" -xf -
+
+  printf 'mach-osfmk %s %s\n' "$url" "$source_commit" >> "$ROOT/kernel/xiul/UPSTREAM-SOURCES.txt"
+  echo "::endgroup::"
+}
+
 mkdir -p "$ROOT/kernel/xiul"
 : > "$ROOT/kernel/xiul/UPSTREAM-SOURCES.txt"
 
-import_tree xnu https://github.com/lstudiolab/darwin-xnu.git main
+import_mach
 import_tree linux https://github.com/lstudiolab/linux.git master
 import_tree freebsd https://github.com/lstudiolab/freebsd-src.git main
 
-# The source trees are now ordinary directories tracked by FreeLSSD, not submodules.
+# The imported sources are ordinary tracked directories, not submodules.
 rm -f "$ROOT/.gitmodules"
-git rm --cached -f kernel/xiul/xnu kernel/xiul/linux kernel/xiul/freebsd 2>/dev/null || true
+git rm --cached -f kernel/xiul/xnu kernel/xiul/mach kernel/xiul/linux kernel/xiul/freebsd 2>/dev/null || true
 git add -A kernel/xiul .gitmodules
 
 if git diff --cached --quiet; then
@@ -44,5 +68,5 @@ fi
 
 git -c user.name="github-actions[bot]" \
     -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
-    commit -m "Import full XNU, Linux and FreeBSD source into XIUL"
+    commit -m "Import Mach osfmk, Linux and FreeBSD sources into XIUL"
 git push origin "HEAD:main"
