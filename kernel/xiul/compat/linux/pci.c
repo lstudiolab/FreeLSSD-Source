@@ -51,7 +51,7 @@ xiul_status_t xiul_linux_pci_register_driver(const xiul_linux_pci_driver_t *driv
     xiul_linux_pci_registration_t *registration;
     size_t i;
     xiul_status_t status;
-    if (driver == 0 || driver->name == 0 || driver->name[0] == '\\0' ||
+    if (driver == 0 || driver->name == 0 || driver->name[0] == '\0' ||
         driver->id_table == 0 || driver->id_count == 0 ||
         driver->id_count > XIUL_DRIVER_ID_MAX || driver->probe == 0)
         return XIUL_E_INVALID;
