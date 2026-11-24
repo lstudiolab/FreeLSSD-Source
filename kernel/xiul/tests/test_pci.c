@@ -84,12 +84,15 @@ static xiul_status_t driver_probe(xiul_linux_pci_device_t *device,
     assert(xiul_linux_pci_resource_start(device, 0) == 0xf0000000u);
     assert(xiul_linux_pci_resource_length(device, 0) == 4096);
     assert(xiul_linux_pci_iomap(device, 0) != 0);
+    assert(xiul_linux_pci_enable_device(device) == XIUL_OK);
+    assert(xiul_linux_pci_set_master(device) == XIUL_OK);
     ++probed;
     return XIUL_OK;
 }
 static void driver_remove(xiul_linux_pci_device_t *device)
 {
-    (void)device;
+    xiul_linux_pci_clear_master(device);
+    xiul_linux_pci_disable_device(device);
     ++removed;
 }
 
@@ -130,10 +133,12 @@ int main(void)
     assert(xiul_linux_pci_register_driver(&driver) == XIUL_OK);
     assert(xiul_pci_enumerate(&host, &found) == XIUL_OK);
     assert(found == 1 && xiul_pci_device_count() == 1);
-    assert(probed == 1 && fake.maps == 1);\n    assert((fake.config[1] & 0xffffu) == 0x0007u);
+    assert(probed == 1 && fake.maps == 1);
+    assert((fake.config[1] & 0xffffu) == 0x0007u);\n    assert((fake.config[1] & 0xffffu) == 0x0007u);
     assert((fake.config[1] & 0xffffu) == 0x0003u);
     assert(xiul_pci_remove_all() == XIUL_OK);
-    assert(removed == 1 && fake.unmaps == 1);\n    assert((fake.config[1] & 0xffffu) == 0x0003u);
+    assert(removed == 1 && fake.unmaps == 1);
+    assert((fake.config[1] & 0xffffu) == 0x0003u);\n    assert((fake.config[1] & 0xffffu) == 0x0003u);
     assert(xiul_linux_pci_unregister_driver(&driver) == XIUL_OK);
     assert(xiul_linux_pci_driver_count() == 0);
     xiul_device_test_reset();
