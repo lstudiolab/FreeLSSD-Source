@@ -2,12 +2,12 @@
 #include <stdio.h>
 #include "xiul/device.h"
 
-static int probes;
+static int probes;\nstatic int driver_token;
 static int removals;
 static xiul_status_t probe_ok(xiul_device_t *device)
 {
     ++probes;
-    device->driver_data = (void *)1;
+    device->driver_data = &driver_token;
     return XIUL_OK;
 }
 static void remove_device(xiul_device_t *device)
