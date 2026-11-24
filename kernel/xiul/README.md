@@ -57,8 +57,15 @@ The complete XNU source tree is excluded. Only the selected Mach `osfmk/` source
 6. Mach's historical I/O Kit dependencies must not cause the complete XNU tree to be imported. XIUL owns its I/O stream and driver interfaces; dependencies are adapted individually.
 7. Upstream source remains attributed and licensed under its original terms. Preserve per-file notices and review licensing before linking or redistribution.
 
-## Build and status
+## Build, tests and status
 
-Run `make -C kernel/xiul source-audit` to check that the expected source roots and XIUL integration directories exist.
+Run:
 
-The audit is not a kernel build. The imported upstream trees still require dependency audits and architecture-specific ports. XIUL must not be described as bootable until its platform startup, Mach dependency adapters, driver shim, BSD adapters, linker/build rules and boot tests work together on a named target.
+```sh
+make -C kernel/xiul source-audit
+make -C kernel/xiul test
+```
+
+The host test suite validates the XIUL subsystem lifecycle manager, I/O ring stream and device/driver registry. These tests do not compile the upstream Mach, Linux or FreeBSD kernels and do not create a bootable XIUL image.
+
+The imported upstream trees still require dependency audits and architecture-specific ports. XIUL must not be described as bootable until platform startup, Mach dependency adapters, Linux driver shims, BSD adapters, linker/build rules and end-to-end boot tests work together on a named target.
