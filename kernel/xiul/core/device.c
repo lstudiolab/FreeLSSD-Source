@@ -30,10 +30,24 @@ static int driver_matches(const xiul_driver_t *driver,
                           const xiul_device_t *device)
 {
     size_t i;
-    for (i = 0; i < driver->id_count; ++i) {
+    for (i = 0; i < driver->id_count; ++i)
         if (id_matches(&driver->id_table[i], &device->id)) return 1;
-    }
     return 0;
+}
+
+static xiul_status_t call_probe(const xiul_driver_t *driver, xiul_device_t *device)
+{
+    if (driver->probe_context != 0)
+        return driver->probe_context(device, driver->context);
+    return driver->probe(device);
+}
+
+static void call_remove(const xiul_driver_t *driver, xiul_device_t *device)
+{
+    if (driver->remove_context != 0)
+        driver->remove_context(device, driver->context);
+    else if (driver->remove != 0)
+        driver->remove(device);
 }
 
 static void try_bind(xiul_device_t *device)
@@ -43,7 +57,7 @@ static void try_bind(xiul_device_t *device)
     for (i = 0; i < drivers_used; ++i) {
         const xiul_driver_t *driver = drivers[i];
         if (!driver_matches(driver, device)) continue;
-        if ((driver->probe_context != 0\n                ? driver->probe_context(device, driver->context)\n                : driver->probe(device)) == XIUL_OK) {
+        if (call_probe(driver, device) == XIUL_OK) {
             device->bound_driver = driver;
             return;
         }
@@ -55,14 +69,11 @@ xiul_status_t xiul_device_register(xiul_device_t *device)
 {
     size_t i;
     if (device == 0 || device->name == 0 || device->name[0] == '\0' ||
-        device->id.bus < XIUL_BUS_PLATFORM || device->id.bus > XIUL_BUS_VIRTIO) {
+        device->id.bus < XIUL_BUS_PLATFORM || device->id.bus > XIUL_BUS_VIRTIO)
         return XIUL_E_INVALID;
-    }
-    for (i = 0; i < devices_used; ++i) {
-        if (devices[i] == device || same_name(devices[i]->name, device->name)) {
+    for (i = 0; i < devices_used; ++i)
+        if (devices[i] == device || same_name(devices[i]->name, device->name))
             return XIUL_E_DUPLICATE;
-        }
-    }
     if (devices_used == XIUL_DEVICE_MAX) return XIUL_E_CAPACITY;
     device->driver_data = 0;
     device->bound_driver = 0;
@@ -78,9 +89,7 @@ xiul_status_t xiul_device_unregister(xiul_device_t *device)
     for (i = 0; i < devices_used; ++i) {
         if (devices[i] != device) continue;
         if (device->bound_driver != 0) {
-            if (device->bound_driver->remove != 0) {
-                device->bound_driver->remove(device);
-            }
+            call_remove(device->bound_driver, device);
             device->bound_driver = 0;
             device->driver_data = 0;
         }
@@ -96,14 +105,12 @@ xiul_status_t xiul_driver_register(const xiul_driver_t *driver)
     size_t i;
     if (driver == 0 || driver->name == 0 || driver->name[0] == '\0' ||
         driver->id_table == 0 || driver->id_count == 0 ||
-        driver->id_count > XIUL_DRIVER_ID_MAX || driver->probe == 0) {
+        driver->id_count > XIUL_DRIVER_ID_MAX ||
+        (driver->probe == 0 && driver->probe_context == 0))
         return XIUL_E_INVALID;
-    }
-    for (i = 0; i < drivers_used; ++i) {
-        if (drivers[i] == driver || same_name(drivers[i]->name, driver->name)) {
+    for (i = 0; i < drivers_used; ++i)
+        if (drivers[i] == driver || same_name(drivers[i]->name, driver->name))
             return XIUL_E_DUPLICATE;
-        }
-    }
     if (drivers_used == XIUL_DRIVER_MAX) return XIUL_E_CAPACITY;
     drivers[drivers_used++] = driver;
     for (i = 0; i < devices_used; ++i) try_bind(devices[i]);
@@ -118,7 +125,7 @@ xiul_status_t xiul_driver_unregister(const xiul_driver_t *driver)
         if (drivers[i] != driver) continue;
         for (j = 0; j < devices_used; ++j) {
             if (devices[j]->bound_driver != driver) continue;
-            if (driver->remove != 0) driver->remove(devices[j]);
+            call_remove(driver, devices[j]);
             devices[j]->bound_driver = 0;
             devices[j]->driver_data = 0;
         }
@@ -137,9 +144,8 @@ void xiul_device_test_reset(void)
 {
     size_t i;
     for (i = 0; i < devices_used; ++i) {
-        if (devices[i]->bound_driver && devices[i]->bound_driver->remove) {
-            devices[i]->bound_driver->remove(devices[i]);
-        }
+        if (devices[i]->bound_driver != 0)
+            call_remove(devices[i]->bound_driver, devices[i]);
         devices[i]->bound_driver = 0;
         devices[i]->driver_data = 0;
         devices[i] = 0;
