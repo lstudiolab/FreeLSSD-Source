@@ -92,6 +92,7 @@ static xiul_status_t x86_read16(void *context, uint8_t bus, uint8_t device,
     uint32_t address;
     xiul_irq_state_t irq;
     xiul_status_t status;
+    (void)context;
     if (value == 0 || offset >= 256u || (offset & 1u) != 0)
         return XIUL_E_INVALID;
     address = UINT32_C(0x80000000) |
