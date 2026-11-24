@@ -18,6 +18,9 @@ $(BUILD_DIR)/test_subsystem: core/subsystem.c tests/test_subsystem.c include/xiu
 $(BUILD_DIR)/test_stream: io/stream.c tests/test_stream.c io/stream.h include/xiul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) io/stream.c tests/test_stream.c -o $@
 
+$(BUILD_DIR)/test_linux_pci: core/device.c compat/linux/pci.c tests/test_linux_pci.c include/xiul/linux_pci.h include/xiul/device.h include/xiul/status.h | $(BUILD_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING core/device.c compat/linux/pci.c tests/test_linux_pci.c -o $@
+
 $(BUILD_DIR)/test_net: bsd/net/net.c tests/test_net.c include/xiul/net.h include/xiul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING bsd/net/net.c tests/test_net.c -o $@
 
@@ -36,11 +39,12 @@ $(BUILD_DIR)/test_platform: core/platform.c tests/test_platform.c include/xiul/p
 $(BUILD_DIR)/test_device: core/device.c tests/test_device.c include/xiul/device.h include/xiul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING core/device.c tests/test_device.c -o $@
 
-test: $(BUILD_DIR)/test_subsystem $(BUILD_DIR)/test_stream $(BUILD_DIR)/test_device $(BUILD_DIR)/test_platform $(BUILD_DIR)/test_net $(BUILD_DIR)/test_vfs $(BUILD_DIR)/test_posix $(BUILD_DIR)/test_nke
+test: $(BUILD_DIR)/test_subsystem $(BUILD_DIR)/test_stream $(BUILD_DIR)/test_device $(BUILD_DIR)/test_platform $(BUILD_DIR)/test_linux_pci $(BUILD_DIR)/test_net $(BUILD_DIR)/test_vfs $(BUILD_DIR)/test_posix $(BUILD_DIR)/test_nke
 	./$(BUILD_DIR)/test_subsystem
 	./$(BUILD_DIR)/test_stream
 	./$(BUILD_DIR)/test_device
 	./$(BUILD_DIR)/test_platform
+	./$(BUILD_DIR)/test_linux_pci
 	./$(BUILD_DIR)/test_net
 	./$(BUILD_DIR)/test_vfs
 	./$(BUILD_DIR)/test_posix
