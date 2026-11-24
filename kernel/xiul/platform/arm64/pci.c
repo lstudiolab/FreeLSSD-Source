@@ -8,7 +8,7 @@ static volatile uint8_t *ecam_address(xiul_arm64_pci_ecam_context_t *context,
     if (context == 0 || context->ecam_virtual_base == 0 ||
         device >= 32u || function >= 8u || offset >= 256u)
         return 0;
-    if (bus < context->first_bus) return 0;
+    if (bus < context->first_bus || bus > context->last_bus) return 0;
     bus_offset = ((uint64_t)(bus - context->first_bus) << 20) |
                  ((uint64_t)device << 15) |
                  ((uint64_t)function << 12) | offset;
@@ -80,6 +80,7 @@ xiul_status_t xiul_pci_host_init_arm64_ecam(
         first_bus > last_bus) return XIUL_E_INVALID;
     context->ecam_virtual_base = (volatile uint8_t *)ecam_virtual_base;
     context->first_bus = first_bus;
+    context->last_bus = last_bus;
     context->segment = segment;
     host->context = context;
     host->first_bus = first_bus;
