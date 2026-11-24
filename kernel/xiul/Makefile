@@ -63,10 +63,12 @@ $(BUILD_DIR)/arm64:
 x86_64-build: | $(BUILD_DIR)/x86_64
 	$(CC) $(CPPFLAGS) $(FREESTANDING_CFLAGS) -m64 -mno-red-zone -mcmodel=kernel -c core/platform.c -o $(BUILD_DIR)/x86_64/platform-core.o
 	$(CC) $(CPPFLAGS) $(FREESTANDING_CFLAGS) -m64 -mno-red-zone -mcmodel=kernel -c platform/x86_64/platform.c -o $(BUILD_DIR)/x86_64/platform-arch.o
+	$(CC) $(CPPFLAGS) $(FREESTANDING_CFLAGS) -m64 -mno-red-zone -mcmodel=kernel -c platform/x86_64/pci.c -o $(BUILD_DIR)/x86_64/pci-host.o
 
 arm64-build: | $(BUILD_DIR)/arm64
 	$(CC_ARM64) $(CPPFLAGS) $(FREESTANDING_CFLAGS) -mgeneral-regs-only -c core/platform.c -o $(BUILD_DIR)/arm64/platform-core.o
 	$(CC_ARM64) $(CPPFLAGS) $(FREESTANDING_CFLAGS) -mgeneral-regs-only -c platform/arm64/platform.c -o $(BUILD_DIR)/arm64/platform-arch.o
+	$(CC_ARM64) $(CPPFLAGS) $(FREESTANDING_CFLAGS) -mgeneral-regs-only -c platform/arm64/pci.c -o $(BUILD_DIR)/arm64/pci-host.o
 
 arch-build: x86_64-build arm64-build
 
