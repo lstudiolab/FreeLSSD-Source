@@ -11,7 +11,7 @@ Linux source is used as a pool for selected hardware drivers. Linux is not a sec
 - exposes BAR start/length/mapped-address accessors and driver-private data;
 - tracks device enable state.
 
-The generic PCI enumerator now scans a host-provided bus range, identifies functions, probes and sizes I/O and memory BARs with decode disabled, maps memory BARs through a host callback, registers devices in the shared XIUL device registry and unmaps resources on removal. Its config-space and mapping operations are supplied by an architecture PCI host backend; x86_64 mechanism-1 and AArch64 ECAM backends are still required. IRQ allocation, DMA, power management and a Linux kernel API header environment are not implemented here. This adapter does not make arbitrary upstream Linux PCI drivers source-compatible yet.
+The generic PCI enumerator now scans a host-provided bus range, identifies functions, probes and sizes I/O and memory BARs with decode disabled, maps memory BARs through an optional host callback, registers devices in the shared XIUL device registry and unmaps resources on removal. x86_64 legacy CF8/CFC and AArch64 ECAM configuration-space backends are implemented and cross-compiled. The platform VM layer still needs to provide safe MMIO mappings; IRQ routing/allocation, DMA, power management and a Linux kernel API header environment are not implemented here. This adapter does not make arbitrary upstream Linux PCI drivers source-compatible yet.
 
 ## Remaining compatibility APIs
 
