@@ -7,10 +7,10 @@ This document separates imported source, XIUL-owned tested code and actual upstr
 | Area | Imported source | XIUL-owned code | Upstream integration/build |
 |---|---|---|---|
 | Mach | XNU `osfmk/` subtree only | Boot contract and early platform primitives | Not yet built, linked or booted |
-| Linux drivers | Full Linux source tree | Device registry and narrow PCI driver bridge | No upstream Linux driver compiled against XIUL yet |
+| Linux drivers | Full Linux source tree | Device registry, generic PCI enumeration, x86_64 CF8/CFC and ARM64 ECAM config backends, Linux PCI driver bridge | No upstream Linux driver compiled against XIUL yet |
 | FreeBSD networking | Full FreeBSD source tree | Network-interface and packet dispatch boundary | FreeBSD protocol stack not yet adapted or linked |
-| FreeBSD VFS/filesystems | Full FreeBSD source tree | Filesystem registration and mount lifecycle boundary | VFS/vnode/filesystem sources not yet adapted or linked |
-| POSIX | Available in imported source pools | Syscall dispatch plus per-process FD table connected to VFS | No complete process/syscall ABI or user-memory boundary |
+| FreeBSD VFS/filesystems | Full FreeBSD source tree | Mount/open/read/write/close VFS and vnode contract | FreeBSD VFS/vnode/filesystem sources not yet adapted or linked |
+| POSIX | Available in imported source pools | Syscall dispatch plus per-process FD table connected to VFS | No complete process model, syscall ABI or user-memory boundary |
 | NKE | Not an upstream kernel dependency | Priority-ordered packet hooks | No loadable module ABI or safe unload |
 | x86_64 | Mach and FreeBSD architecture source available | Early CPU/IRQ/COM1 platform objects | No complete boot image |
 | ARM64 | Mach and FreeBSD architecture source available | Early CPU/IRQ/PL011 platform objects | No complete boot image |
@@ -19,7 +19,7 @@ This document separates imported source, XIUL-owned tested code and actual upstr
 
 The XIUL workflow currently runs:
 - source-layout and upstream-manifest audit;
-- host tests for subsystem lifecycle, I/O stream, device/driver registry, boot-info validation, synthetic PCI enumeration/BAR mapping/driver binding, Linux PCI bridge, network interfaces, VFS mount/file lifecycle, POSIX syscall dispatch and POSIX-FD-to-VFS integration, and NKE hooks;
+- host tests for kernel boot orchestration, subsystem lifecycle, I/O stream, device/driver registry, boot-info validation, synthetic PCI enumeration/BAR sizing/driver binding, Linux PCI bridge, network interfaces, VFS mount/file lifecycle, POSIX syscall dispatch and POSIX-FD-to-VFS integration, and NKE hooks;
 - freestanding object compilation of XIUL-owned x86_64 and AArch64 early platform and PCI configuration-space backend code.
 
 It does not run:
