@@ -4,7 +4,7 @@ CC_ARM64 ?= aarch64-linux-gnu-gcc
 BUILD_DIR ?= .build
 CPPFLAGS += -Iinclude -Iio
 CFLAGS ?= -std=c11 -O2 -Wall -Wextra -Werror -pedantic
-FREESTANDING_CFLAGS = -std=c11 -O2 -Wall -Wextra -Werror -ffreestanding -fno-builtin -fno-stack-protector
+FREESTANDING_CFLAGS = -std=c11 -O2 -Wall -Wextra -Werror -ffreestanding -fno-builtin -fno-stack-protector -fno-pie
 
 .PHONY: all test source-audit arch-build x86_64-build arm64-build clean
 all: test arch-build
