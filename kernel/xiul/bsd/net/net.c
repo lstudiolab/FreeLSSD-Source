@@ -123,6 +123,10 @@ void xiul_net_test_reset(void)
     for (i = 0; i < interface_count; ++i) interfaces[i] = 0;
     interface_count = 0;
     input_handler = 0;
-    for (i = 0; i < protocol_count; ++i) {\n        protocols[i].protocol = 0;\n        protocols[i].handler = 0;\n    }\n    protocol_count = 0;
+    for (i = 0; i < protocol_count; ++i) {
+        protocols[i].protocol = 0;
+        protocols[i].handler = 0;
+    }
+    protocol_count = 0;
 }
 #endif
