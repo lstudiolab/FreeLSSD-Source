@@ -104,15 +104,67 @@ xiul_status_t xiul_linux_pci_unregister_driver(const xiul_linux_pci_driver_t *dr
 
 xiul_status_t xiul_linux_pci_enable_device(xiul_linux_pci_device_t *device)
 {
+    uint16_t command;
+    unsigned int i;
+    xiul_status_t status;
     if (device == 0 || device->device.id.bus != XIUL_BUS_PCI)
         return XIUL_E_INVALID;
+    if (device->host != 0) {
+        status = device->host->read16(device->host->context, device->bus_number,
+            device->device_number, device->function_number, 0x04u, &command);
+        if (status != XIUL_OK) return status;
+        for (i = 0; i < XIUL_LINUX_PCI_BAR_COUNT; ++i) {
+            if ((device->bar_flags[i] & XIUL_LINUX_PCI_BAR_IO) != 0) command |= 1u;
+            if ((device->bar_flags[i] & XIUL_LINUX_PCI_BAR_MEMORY) != 0) command |= 2u;
+        }
+        status = device->host->write16(device->host->context, device->bus_number,
+            device->device_number, device->function_number, 0x04u, command);
+        if (status != XIUL_OK) return status;
+    }
     device->enabled = 1;
     return XIUL_OK;
 }
 
 void xiul_linux_pci_disable_device(xiul_linux_pci_device_t *device)
 {
-    if (device != 0) device->enabled = 0;
+    uint16_t command;
+    if (device == 0) return;
+    if (device->host != 0 &&
+        device->host->read16(device->host->context, device->bus_number,
+            device->device_number, device->function_number, 0x04u, &command) == XIUL_OK) {
+        command = (uint16_t)((command & ~UINT16_C(3)) |
+                             (device->original_command & UINT16_C(3)));
+        (void)device->host->write16(device->host->context, device->bus_number,
+            device->device_number, device->function_number, 0x04u, command);
+    }
+    device->enabled = 0;
+}
+
+xiul_status_t xiul_linux_pci_set_master(xiul_linux_pci_device_t *device)
+{
+    uint16_t command;
+    xiul_status_t status;
+    if (device == 0 || device->device.id.bus != XIUL_BUS_PCI)
+        return XIUL_E_INVALID;
+    if (device->host == 0) return XIUL_E_UNSUPPORTED;
+    status = device->host->read16(device->host->context, device->bus_number,
+        device->device_number, device->function_number, 0x04u, &command);
+    if (status != XIUL_OK) return status;
+    return device->host->write16(device->host->context, device->bus_number,
+        device->device_number, device->function_number, 0x04u,
+        (uint16_t)(command | UINT16_C(4)));
+}
+
+void xiul_linux_pci_clear_master(xiul_linux_pci_device_t *device)
+{
+    uint16_t command;
+    if (device == 0 || device->host == 0) return;
+    if (device->host->read16(device->host->context, device->bus_number,
+        device->device_number, device->function_number, 0x04u, &command) != XIUL_OK)
+        return;
+    (void)device->host->write16(device->host->context, device->bus_number,
+        device->device_number, device->function_number, 0x04u,
+        (uint16_t)(command & ~UINT16_C(4)));
 }
 
 uint64_t xiul_linux_pci_resource_start(const xiul_linux_pci_device_t *device, unsigned int bar)
