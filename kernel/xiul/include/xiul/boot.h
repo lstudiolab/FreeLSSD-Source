@@ -26,6 +26,10 @@ typedef struct {
     uint64_t uart_virtual;
     uint32_t uart_clock_hz;
     uint32_t uart_baud_rate;
+    uint64_t pci_ecam_virtual;
+    uint16_t pci_segment;
+    uint8_t pci_first_bus;
+    uint8_t pci_last_bus;
     uint64_t firmware_table_physical;
     uint64_t framebuffer_physical;
     uint32_t framebuffer_width;
