@@ -36,15 +36,15 @@ static void pci_subsystem_shutdown(xiul_kernel_context_t *context)
 
 static const xiul_subsystem_descriptor_t platform_subsystem = {
     XIUL_ABI_VERSION, "platform", XIUL_PHASE_PLATFORM,
-    0, 0, (xiul_subsystem_init_fn)platform_subsystem_init,
-    (xiul_subsystem_shutdown_fn)platform_subsystem_shutdown
+    0, 0, platform_subsystem_init,
+    platform_subsystem_shutdown
 };
 
 static const char *const pci_dependencies[] = {"platform"};
 static const xiul_subsystem_descriptor_t pci_subsystem = {
     XIUL_ABI_VERSION, "pci", XIUL_PHASE_PLATFORM,
-    pci_dependencies, 1, (xiul_subsystem_init_fn)pci_subsystem_init,
-    (xiul_subsystem_shutdown_fn)pci_subsystem_shutdown
+    pci_dependencies, 1, pci_subsystem_init,
+    pci_subsystem_shutdown
 };
 
 xiul_status_t xiul_kernel_boot(const xiul_boot_info_t *boot_info)
@@ -59,7 +59,7 @@ xiul_status_t xiul_kernel_boot(const xiul_boot_info_t *boot_info)
     if (status != XIUL_OK) return status;
     status = xiul_subsystem_validate();
     if (status != XIUL_OK) return status;
-    status = xiul_subsystem_start_all((xiul_kernel_context_t *)&kernel_context);
+    status = xiul_subsystem_start_all(&kernel_context);
     if (status == XIUL_OK) kernel_started = 1;
     return status;
 }
@@ -67,7 +67,7 @@ xiul_status_t xiul_kernel_boot(const xiul_boot_info_t *boot_info)
 void xiul_kernel_shutdown(void)
 {
     if (!kernel_started) return;
-    xiul_subsystem_stop_all((xiul_kernel_context_t *)&kernel_context);
+    xiul_subsystem_stop_all(&kernel_context);
     kernel_started = 0;
 }
 
