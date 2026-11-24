@@ -1,0 +1,114 @@
+[
+    {
+        "description": "simple enum validation",
+        "schema": {"enum": [1, 2, 3]},
+        "tests": [
+            {
+                "description": "one of the enum is valid",
+                "data": 1,
+                "valid": true
+            },
+            {
+                "description": "something else is invalid",
+                "data": 4,
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "heterogeneous enum validation",
+        "schema": {"enum": [6, "foo", [], true, {"foo": 12}]},
+        "tests": [
+            {
+                "description": "one of the enum is valid",
+                "data": [],
+                "valid": true
+            },
+            {
+                "description": "something else is invalid",
+                "data": null,
+                "valid": false
+            },
+            {
+                "description": "objects are deep compared",
+                "data": {"foo": false},
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "enums in properties",
+        "schema": {
+           "type":"object",
+		     "properties": {
+		        "foo": {"enum":["foo"]},
+		        "bar": {"enum":["bar"]}
+		     },
+		     "required": ["bar"]
+		  },
+        "tests": [
+            {
+                "description": "both properties are valid",
+                "data": {"foo":"foo", "bar":"bar"},
+                "valid": true
+            },
+            {
+                "description": "missing optional property is valid",
+                "data": {"bar":"bar"},
+                "valid": true
+            },
+            {
+                "description": "missing required property is invalid",
+                "data": {"foo":"foo"},
+                "valid": false
+            },
+            {
+                "description": "missing all properties is invalid",
+                "data": {},
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "enum with strings that contain a NUL byte",
+        "schema": {"enum": ["a\u0000b"]},
+        "tests": [
+            {
+                "description": "the same string is valid",
+                "data": "a\u0000b",
+                "valid": true
+            },
+            {
+                "description": "a string that differs after the NUL byte is invalid",
+                "data": "a\u0000c",
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "enum with numbers",
+        "schema": {"enum": [1.5, 9007199254740993]},
+        "tests": [
+            {
+                "description": "the same fraction is valid",
+                "data": 1.5,
+                "valid": true
+            },
+            {
+                "description": "a fraction less than one apart is invalid",
+                "data": 1.2,
+                "valid": false
+            },
+            {
+                "description": "the same large integer is valid",
+                "data": 9007199254740993,
+                "valid": true
+            },
+            {
+                "description": "a large integer that a double cannot tell apart is invalid",
+                "data": 9007199254740992,
+                "valid": false
+            }
+        ]
+    }
+]

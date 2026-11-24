@@ -1,0 +1,323 @@
+.\" Copyright (c) 1983, 1991, 1993
+.\"	The Regents of the University of California.  All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+.\"
+.Dd October 24, 2026
+.Dt CHROOT 2
+.Os
+.Sh NAME
+.Nm chroot ,
+.Nm fchroot ,
+.Nm chaltroot ,
+.Nm fchaltroot
+.Nd change root or alternative root directory
+.Sh LIBRARY
+.Lb libc
+.Sh SYNOPSIS
+.In unistd.h
+.Ft int
+.Fn chroot "const char *dirname"
+.Ft int
+.Fn fchroot "int fd"
+.Ft int
+.Fn chaltroot "const char *dirname"
+.Ft int
+.Fn fchaltroot "int fd"
+.Sh DESCRIPTION
+The
+.Fa dirname
+argument
+is the address of the pathname of a directory, terminated by an ASCII NUL.
+The
+.Fn chroot
+system call causes
+.Fa dirname
+to become the root directory,
+that is, the starting point for path searches of pathnames
+beginning with
+.Ql / .
+.Pp
+In order for a directory to become the root directory
+a process must have execute (search) access for that directory.
+.Pp
+It should be noted that
+.Fn chroot
+has no effect on the process's current directory.
+.Pp
+Depending on the setting of the
+.Ql kern.chroot_allow_open_directories
+sysctl variable, open file descriptors which reference directories
+will make the
+.Fn chroot
+fail as follows:
+.Pp
+If
+.Ql kern.chroot_allow_open_directories
+is set to zero,
+.Fn chroot
+will always fail with
+.Er EPERM
+if there are any directories open.
+.Pp
+If
+.Ql kern.chroot_allow_open_directories
+is set to one (the default),
+.Fn chroot
+will fail with
+.Er EPERM
+if there are any directories open and the
+process is already subject to the
+.Fn chroot
+system call.
+.Pp
+Any other value for
+.Ql kern.chroot_allow_open_directories
+will bypass the check for open directories,
+mimicking the historic insecure behavior of
+.Fn chroot
+still present on other systems.
+.Pp
+The
+.Fn fchroot
+system call is identical to
+.Fn chroot
+except it takes a file descriptor instead of path.
+.Pp
+The
+.Fn chaltroot
+system call sets or changes the
+.Dq alternative root
+directory.
+If set to a directory for which the process has
+search permission, that directory is used as a root for
+absolute path lookups.
+If the lookup succeeds, the result is used.
+If the lookup fails with
+.Er ENOENT ,
+a second lookup is automatically initiated,
+starting from the process' true root directory,
+and the result of that lookup is returned.
+.Pp
+Calling the
+.Fn chaltroot
+system call with the
+.Fa dirname
+argument set to
+.Dv NULL
+disables the alternative root for the process.
+.Pp
+As with the normal root directory, the alternative root directory is
+inherited by child processes created by
+.Xr fork 2 ,
+and preserved across image activations on
+.Xr execve 2 ,
+except as described below.
+.Pp
+The alternative root facility is used by ABI emulators to
+provide a parallel installation of foreign system files
+while still providing seamless access to the file hierarchy
+of the host system.
+Upon activation of the executable image branded for the ABI
+emulator, the kernel automatically resets the alternative root to
+the value assigned to the ABI.
+When a process running under the ABI emulator activates a native
+image, the alternative root is disabled.
+.Pp
+Activation of a set-user-ID or set-group-ID image for the native ABI
+disables the alternative root, unless the set-ID bits are ignored,
+for instance because the process has enabled the
+.Dv PROC_NO_NEW_PRIVS_CTL
+.Xr procctl 2
+setting.
+Entering capability mode with
+.Xr cap_enter 2
+also disables the alternative root.
+.Pp
+Lookups which are restricted to stay beneath their starting directory,
+see the
+.Dv O_RESOLVE_BENEATH
+flag of
+.Xr open 2 ,
+do not use the alternative root.
+.Pp
+The
+.Fn fchaltroot
+system call is similar to
+.Fn chaltroot
+but takes a file descriptor to designate the new alternative root
+instead of a path.
+Calling the
+.Fn fchaltroot
+system call with the
+.Fa fd
+argument of
+.Dv FCHALTROOT_DISABLE
+disables the alternative root for the process.
+.Pp
+All functions described in this page are restricted to the super-user,
+unless the
+.Ql Va security.bsd.unprivileged_chroot
+sysctl variable is set to 1
+and the process has enabled the
+.Dv PROC_NO_NEW_PRIVS_CTL
+.Xr procctl 2
+setting.
+.Sh RETURN VALUES
+.Rv -std
+.Sh ERRORS
+The
+.Fn chroot ,
+.Fn fchroot ,
+.Fn chaltroot ,
+and
+.Fn fchaltroot
+system calls
+will fail and the root or alternative root directory will be unchanged if:
+.Bl -tag -width Er
+.It Bq Er EPERM
+The effective user ID is not the super-user and the
+.Ql Va security.bsd.unprivileged_chroot
+sysctl is 0.
+.It Bq Er EPERM
+The effective user ID is not the super-user and the
+process has not enabled the
+.Dv PROC_NO_NEW_PRIVS_CTL
+.Xr procctl 2 .
+.It Bq Er EPERM
+The effective user ID is not the super-user and the
+current/root directory state of the process is shared with
+another process, see
+.Xr rfork 2 .
+.It Bq Er EPERM
+One or more file descriptors are open directories and the
+.Ql Va kern.chroot_allow_open_directories
+sysctl is not set to permit this.
+.It Bq Er EIO
+An I/O error occurred while reading from or writing to the file system.
+.It Bq Er EINTEGRITY
+Corrupted data was detected while reading from the file system.
+.El
+.Pp
+The
+.Fn chroot
+and
+.Fn chaltroot
+system calls
+will fail and the root or alternative root directory
+will be unchanged if:
+.Bl -tag -width Er
+.It Bq Er ENOTDIR
+A component of the path name is not a directory.
+.It Bq Er ENAMETOOLONG
+A component of a pathname exceeded 255 characters,
+or an entire path name exceeded 1023 characters.
+.It Bq Er ENOENT
+The named directory does not exist.
+.It Bq Er EACCES
+Search permission is denied for any component of the path name.
+.It Bq Er ELOOP
+Too many symbolic links were encountered in translating the pathname.
+.It Bq Er EFAULT
+The
+.Fa dirname
+argument
+points outside the process's allocated address space.
+.El
+.Pp
+The
+.Fn fchroot
+and
+.Fn fchaltroot
+system calls
+will fail and the root or alternative root directory
+will be unchanged if:
+.Bl -tag -width Er
+.It Bq Er EACCES
+Search permission is denied for the directory referenced by the
+file descriptor.
+.It Bq Er EBADF
+The argument
+.Fa fd
+is not a valid file descriptor.
+.It Bq Er ENOTDIR
+The file descriptor does not reference a directory.
+.It Bq Er ENOTCAPABLE
+The
+.Fa fd
+file descriptor has the
+.Dv FD_RESOLVE_BENEATH
+flag set.
+In particular, it was opened with the
+.Dv O_RESOLVE_BENEATH
+flag.
+.El
+.Sh SEE ALSO
+.Xr cap_enter 2 ,
+.Xr chdir 2 ,
+.Xr jail 2
+.Sh HISTORY
+The
+.Fn chroot
+system call appeared in
+.At v7 .
+It was marked as
+.Dq legacy
+in
+.St -susv2 ,
+and was removed in subsequent standards.
+The
+.Fn fchroot
+system call first appeared in
+.Fx 15.0 .
+The
+.Fn chaltroot
+and
+.Fn fchaltroot
+system calls first appeared in
+.Fx 16.0 .
+.Sh BUGS
+If the process is able to change its working directory to the target
+directory, but another access control check fails (such as a check for
+open directories, or a MAC check), it is possible that this system
+call may return an error, with the working directory of the process
+left changed.
+.Sh SECURITY CONSIDERATIONS
+The system has many hardcoded paths to files which it may load after
+the process starts.
+It is generally recommended to drop privileges immediately after a
+successful
+.Nm
+call,
+and restrict write access to a limited subtree of the
+.Nm
+root.
+For instance,
+setup the sandbox so that the sandboxed user will have no write
+access to any well-known system directories.
+.Pp
+For complete isolation from the rest of the system, use
+.Xr jail 2
+instead.

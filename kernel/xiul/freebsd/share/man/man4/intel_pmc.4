@@ -1,0 +1,90 @@
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.\" Copyright (c) 2026 Abdelkader Boudih <seuros@FreeBSD.org>
+.\"
+.Dd September 11, 2026
+.Dt INTEL_PMC 4
+.Os
+.Sh NAME
+.Nm intel_pmc
+.Nd Intel Performance Management Controller driver
+.Sh SYNOPSIS
+.Cd device intel_pmc
+.Sh DESCRIPTION
+The
+.Nm
+driver exposes information and controls from the Performance
+Management Controller (PMC) of Intel platforms, providing access to
+debug information and controls related to S0ix (Modern Standby).
+.Pp
+On Sunrise Point (Skylake and Kaby Lake generations) the PMC is a PCI
+function and the driver attaches to it.
+Later generations do not enumerate the PMC on PCI; there the driver
+identifies the platform by CPU model and maps the register space at
+the architectural base address.
+The residency counter address in the ACPI LPIT table is compared
+against that window and a mismatch is reported.
+.Pp
+The cumulative time spent in low power mode while in S0 is reported,
+and the administrator can force the platform to ignore IP blocks
+whose Latency Tolerance Reporting (LTR) prevents the platform from
+entering S0ix.
+.Sh HARDWARE
+The
+.Nm
+driver supports the PMC block found in the following Intel Platform
+Controller Hubs:
+.Pp
+.Bl -bullet -compact
+.It
+Sunrise Point-LP (6th/7th Gen Core mobile)
+.It
+Sunrise Point-H (6th/7th Gen Core desktop/server)
+.It
+Cannon Lake, Comet Lake
+.It
+Ice Lake, Jasper Lake
+.It
+Tiger Lake, Elkhart Lake, Rocket Lake
+.It
+Alder Lake, Raptor Lake
+.It
+Meteor Lake
+.El
+.Sh SYSCTLS
+The following
+.Xr sysctl 8
+variables are available:
+.Bl -tag -width indent
+.It Va dev.intel_pmc.%d.ltr_ignore Pq read-write
+Latency Tolerance Reporting (LTR) ignore mask.
+Setting a bit tells the PMC to ignore that IP block's LTR requirements,
+allowing S0ix entry even if the IP would otherwise block it.
+The number and meaning of the bits vary by platform; consult the
+datasheet listed in
+.Sx SEE ALSO .
+.It Va dev.intel_pmc.%d.slp_s0_residency Pq read-only
+Cumulative time in microseconds that the platform has been in S0ix.
+A value that never advances indicates S0ix transitions are not
+occurring.
+This value wraps after a few days, as the counter is 32-bit and
+updated approximately every 100us (platform-dependent).
+.El
+.Sh SEE ALSO
+.Xr acpi 4 ,
+.Xr pci 4 ,
+.Xr sysctl 8
+.Pp
+Intel 100 Series Chipset Family PCH Datasheet, Volume 2, Section 4.3.
+.Sh HISTORY
+The
+.Nm
+driver first appeared in
+.Fx 16.0 .
+.Sh AUTHORS
+.An Abdelkader Boudih Aq Mt seuros@FreeBSD.org
+.Sh CAVEATS
+Desktop firmware frequently does not implement S0ix; the driver still
+attaches there, but the residency counter never advances.
+Lunar Lake and later are not yet supported.

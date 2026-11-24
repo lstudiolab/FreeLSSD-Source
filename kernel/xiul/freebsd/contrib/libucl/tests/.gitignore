@@ -1,0 +1,6 @@
+*.log
+*.trs
+*.plist
+
+/test_*
+!/test_*.c

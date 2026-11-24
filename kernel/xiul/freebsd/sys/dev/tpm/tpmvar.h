@@ -1,0 +1,99 @@
+/*
+ * Copyright (c) 2008, 2009 Michael Shalayeff
+ * Copyright (c) 2009, 2010 Hans-Joerg Hoexer
+ * All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF MIND, USE, DATA OR PROFITS, WHETHER IN
+ * AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
+ * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+#ifndef _TPMVAR_H
+#define _TPMVAR_H
+
+#ifdef __FreeBSD__
+#include "opt_tpm.h"
+
+#include <sys/condvar.h>
+#include <sys/kernel.h>
+#include <sys/lock.h>
+#include <sys/mutex.h>
+#include <sys/sx.h>
+#include <sys/taskqueue.h>
+#include <dev/tpm/tpm_irq.h>
+#endif
+
+struct tpm_softc {
+#ifdef __FreeBSD__
+	device_t sc_dev;
+#else
+	struct device sc_dev;
+#endif
+	void *sc_ih;
+
+	int	(*sc_init)(struct tpm_softc *, const char *);
+	int	(*sc_start)(struct tpm_softc *, int);
+	int	(*sc_read)(struct tpm_softc *, void *, int, size_t *, int);
+	int	(*sc_write)(struct tpm_softc *, void *, int);
+	int	(*sc_end)(struct tpm_softc *, int, int);
+
+	bus_space_tag_t sc_bt, sc_batm;
+	bus_space_handle_t sc_bh, sc_bahm;
+
+	u_int32_t sc_devid;
+	u_int32_t sc_rev;
+	u_int32_t sc_stat;
+	u_int32_t sc_capabilities;
+
+	int sc_flags;
+#define	TPM_OPEN	0x0001
+
+#ifdef __FreeBSD__
+	void	*intr_cookie;
+	int mem_rid, irq_rid;
+	struct resource *mem_res, *irq_res;
+	struct cdev *sc_cdev;
+	/* Serialize commands and lifecycle; sc_intr_lock nests inside. */
+	struct sx sc_lock;
+	struct mtx sc_intr_lock;
+	struct cv sc_intr_cv;
+	struct task sc_intr_task;
+	struct intr_config_hook sc_intr_hook;
+	uint32_t sc_intr_mode;
+	struct tpm_irq_config sc_irq_config;
+	bool sc_irq_usable;
+	bool sc_interrupts;
+	bool sc_intr_testing;
+	bool sc_intr_configuring;
+	bool sc_intr_fault;
+	bool sc_intr_armed;
+	bool sc_intr_received;
+	bool sc_dying;
+	bool sc_locality;
+	bool sc_command_pending;
+#if defined TPM_HARVEST || defined RANDOM_ENABLE_TPM
+	struct timeout_task sc_harvest_task;
+	bool sc_harvest_registered;
+#endif
+#endif
+
+#ifndef __FreeBSD__
+	void	*sc_powerhook;
+#endif
+	int	 sc_suspend;
+};
+
+int tpm_tis12_probe(bus_space_tag_t iot, bus_space_handle_t ioh);
+int tpm_attach(device_t dev);
+int tpm_detach(device_t dev);
+int tpm_suspend(device_t dev);
+int tpm_resume(device_t dev);
+#endif
