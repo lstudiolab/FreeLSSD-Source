@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include "xiul/device.h"
 
-static int probes;\nstatic int driver_token;
+static int probes;
+static int driver_token;
 static int removals;
 static xiul_status_t probe_ok(xiul_device_t *device)
 {
