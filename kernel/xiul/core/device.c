@@ -95,7 +95,8 @@ xiul_status_t xiul_driver_register(const xiul_driver_t *driver)
 {
     size_t i;
     if (driver == 0 || driver->name == 0 || driver->name[0] == '\0' ||
-        driver->id_table == 0 || driver->id_count == 0 || driver->probe == 0) {
+        driver->id_table == 0 || driver->id_count == 0 ||
+        driver->id_count > XIUL_DRIVER_ID_MAX || driver->probe == 0) {
         return XIUL_E_INVALID;
     }
     for (i = 0; i < drivers_used; ++i) {
