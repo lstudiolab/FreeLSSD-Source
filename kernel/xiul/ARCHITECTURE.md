@@ -82,6 +82,22 @@ The complete XNU source tree is not part of XIUL. Only selected Mach `osfmk/` fi
 
 Linux-derived files generally carry GPL-2.0 terms; FreeBSD and Mach files have their own license and notice requirements. Preserve all notices and review file-level licenses before combining, linking or distributing components.
 
-## Status
+## Implementation status
 
-The source trees are source material, not proof of integration. Until the platform, adapters, build system and end-to-end boot tests are complete, XIUL remains an integration-in-progress and must not be called a working or bootable kernel.
+Implemented in XIUL-owned code and covered by host-side CI tests:
+
+- fixed-capacity subsystem registry with dependency validation, cycle detection, phase-aware startup, reverse shutdown and failure rollback;
+- bounded single-producer/single-consumer I/O byte stream with nonblocking partial reads/writes and close semantics;
+- fixed-capacity device/driver registry with platform, PCI, USB and VirtIO ID matching, probe/bind and remove/unbind lifecycle;
+- shared status codes, public integration headers, source manifest, source-layout audit and CI test workflow.
+
+Not yet integrated or verified:
+
+- a bootable Mach-derived kernel image and platform entry path;
+- complete Mach dependency adaptation and a real Mach build for a selected architecture;
+- Linux kernel API shims for memory, DMA, IRQ, timers, workqueues, locking, PCI/USB and power management, plus actual Linux driver ports;
+- FreeBSD networking and filesystem code adapted and linked against XIUL packet/VFS interfaces;
+- implemented POSIX syscall/process ABI and NKE load/packet lifecycle;
+- end-to-end boot, hardware, networking, filesystem and ABI tests.
+
+The source trees are source material, not proof of integration. XIUL is still an integration-in-progress and must not be called a working or bootable kernel until these items are complete.
