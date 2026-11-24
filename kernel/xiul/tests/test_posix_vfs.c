@@ -57,6 +57,7 @@ int main(void)
     assert(xiul_vfs_mount("posix-test", "ram", 0, &mount) == XIUL_OK);
     assert(xiul_vfs_open(mount, "/data", XIUL_VFS_OPEN_READ | XIUL_VFS_OPEN_WRITE, &file) == XIUL_OK);
     assert(xiul_posix_fd_install(&process, file, &fd) == XIUL_OK && fd == 0);
+    assert(xiul_posix_fd_install(&process, file, &fd) == XIUL_E_DUPLICATE);
     assert(xiul_posix_fd_write(&process, fd, "abc", 3, &done) == XIUL_OK && done == 3);
     assert(xiul_posix_fd_close(&process, fd) == XIUL_OK);
     assert(xiul_posix_fd_read(&process, fd, out, 3, &done) == XIUL_E_NOT_FOUND);
