@@ -58,7 +58,7 @@ git -c user.name="github-actions[bot]" \
     -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
     commit -m "Import Mach osfmk, Linux and FreeBSD sources into XIUL"
 git fetch origin main
-git -c user.name="github-actions[bot]" \\
-    -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \\
-    rebase origin/main
+git config user.name "github-actions[bot]"
+git config user.email "41898282+users.noreply.github.com"
+git rebase origin/main
 git push origin "HEAD:main"
