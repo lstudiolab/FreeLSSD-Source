@@ -76,8 +76,9 @@ static xiul_status_t probe_bar(const xiul_pci_host_t *host,
                                unsigned int bar, xiul_linux_pci_device_t *pci)
 {
     uint16_t offset = (uint16_t)(0x10u + bar * 4u);
+    uint16_t command;
     uint32_t original_low, mask_low, original_high = 0, mask_high = 0;
-    uint64_t base, mask, length;
+    uint64_t base, length;
     unsigned int type;
     xiul_status_t status;
 
@@ -85,9 +86,27 @@ static xiul_status_t probe_bar(const xiul_pci_host_t *host,
     if (status != XIUL_OK || original_low == 0 || original_low == UINT32_MAX)
         return status;
 
+    status = read16(host, bus, device, function, 0x04u, &command);
+    if (status != XIUL_OK) return status;
+
     if ((original_low & 1u) != 0) {
+        status = write16(host, bus, device, function, 0x04u,
+                         (uint16_t)(command & ~UINT16_C(3)));
+        if (status != XIUL_OK) return status;
+        status = host->write32(host->context, bus, device, function,
+                               offset, UINT32_MAX);
+        if (status == XIUL_OK)
+            status = read32(host, bus, device, function, offset, &mask_low);
+        (void)host->write32(host->context, bus, device, function, offset, original_low);
+        (void)write16(host, bus, device, function, 0x04u, command);
+        if (status != XIUL_OK) return status;
         base = original_low & ~UINT32_C(3);
-        pci->bar_start[bar] = base;
+        mask_low &= ~UINT32_C(3);
+        if (mask_low != 0) {
+            length = (uint32_t)(~mask_low + 1u);
+            pci->bar_start[bar] = base;
+            pci->bar_length[bar] = length;
+        }
         return XIUL_OK;
     }
 
@@ -99,7 +118,8 @@ static xiul_status_t probe_bar(const xiul_pci_host_t *host,
         if (status != XIUL_OK) return status;
     }
 
-    status = write16(host, bus, device, function, 0x04u, 0);
+    status = write16(host, bus, device, function, 0x04u,
+                     (uint16_t)(command & ~UINT16_C(3)));
     if (status != XIUL_OK) return status;
     status = host->write32(host->context, bus, device, function, offset, UINT32_MAX);
     if (status == XIUL_OK && type == 2u)
@@ -115,18 +135,23 @@ static xiul_status_t probe_bar(const xiul_pci_host_t *host,
     if (type == 2u)
         (void)host->write32(host->context, bus, device, function,
                             (uint16_t)(offset + 4u), original_high);
-    (void)write16(host, bus, device, function, 0x04u, 0x0007u);
+    (void)write16(host, bus, device, function, 0x04u, command);
     if (status != XIUL_OK) return status;
 
     if (type == 2u) {
         base = ((uint64_t)original_high << 32) | (original_low & ~UINT32_C(0xf));
-        mask = ((uint64_t)mask_high << 32) | (mask_low & ~UINT32_C(0xf));
+        {
+            uint64_t mask = ((uint64_t)mask_high << 32) |
+                            (mask_low & ~UINT32_C(0xf));
+            if (mask == 0) return XIUL_OK;
+            length = (~mask) + 1u;
+        }
     } else {
+        uint32_t mask = mask_low & ~UINT32_C(0xf);
         base = original_low & ~UINT32_C(0xf);
-        mask = mask_low & ~UINT32_C(0xf);
+        if (mask == 0) return XIUL_OK;
+        length = (uint32_t)(~mask + 1u);
     }
-    if (mask == 0) return XIUL_OK;
-    length = (~mask) + 1u;
     if (length == 0) return XIUL_OK;
     pci->bar_start[bar] = base;
     pci->bar_length[bar] = length;
@@ -188,8 +213,7 @@ static xiul_status_t enumerate_function(const xiul_pci_host_t *host,
     }
     (void)write16(host, bus, device, function, 0x04u, command);
     if (status != XIUL_OK) {
-        slot->host = 0;
-        slot->pci.device.name = 0;
+        release_slot(slot);
         return status;
     }
     status = xiul_device_register(&slot->pci.device);
