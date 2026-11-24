@@ -7,31 +7,20 @@ static size_t sequence_count;
 static int fail_driver;
 
 static xiul_status_t init_ok(xiul_kernel_context_t *context)
-{
-    (void)context;
-    sequence[sequence_count++] = 1;
-    return XIUL_OK;
-}
+{ (void)context; sequence[sequence_count++] = 1; return XIUL_OK; }
 static xiul_status_t init_platform(xiul_kernel_context_t *context)
-{
-    (void)context;
-    sequence[sequence_count++] = 2;
-    return XIUL_OK;
-}
+{ (void)context; sequence[sequence_count++] = 2; return XIUL_OK; }
 static xiul_status_t init_driver(xiul_kernel_context_t *context)
-{
-    (void)context;
-    sequence[sequence_count++] = 3;
-    return fail_driver ? XIUL_E_INIT : XIUL_OK;
-}
+{ (void)context; sequence[sequence_count++] = 3; return fail_driver ? XIUL_E_INIT : XIUL_OK; }
 static void stop_record(xiul_kernel_context_t *context)
-{
-    (void)context;
-    sequence[sequence_count++] = -1;
-}
+{ (void)context; sequence[sequence_count++] = -1; }
 
 static const char *const platform_deps[] = {"mach"};
 static const char *const driver_deps[] = {"platform"};
+static const char *const missing_deps[] = {"not-registered"};
+static const char *const cycle_a_deps[] = {"cycle-b"};
+static const char *const cycle_b_deps[] = {"cycle-a"};
+
 static const xiul_subsystem_descriptor_t mach = {
     XIUL_ABI_VERSION, "mach", XIUL_PHASE_CORE, 0, 0, init_ok, stop_record
 };
@@ -42,6 +31,18 @@ static const xiul_subsystem_descriptor_t platform = {
 static const xiul_subsystem_descriptor_t driver = {
     XIUL_ABI_VERSION, "driver", XIUL_PHASE_DRIVERS,
     driver_deps, 1, init_driver, stop_record
+};
+static const xiul_subsystem_descriptor_t orphan = {
+    XIUL_ABI_VERSION, "orphan", XIUL_PHASE_SERVICES,
+    missing_deps, 1, init_ok, stop_record
+};
+static const xiul_subsystem_descriptor_t cycle_a = {
+    XIUL_ABI_VERSION, "cycle-a", XIUL_PHASE_CORE,
+    cycle_a_deps, 1, init_ok, stop_record
+};
+static const xiul_subsystem_descriptor_t cycle_b = {
+    XIUL_ABI_VERSION, "cycle-b", XIUL_PHASE_CORE,
+    cycle_b_deps, 1, init_ok, stop_record
 };
 
 static void reset(void)
@@ -71,8 +72,16 @@ static void test_duplicate_and_missing_dependency(void)
     reset();
     assert(xiul_subsystem_register(&mach) == XIUL_OK);
     assert(xiul_subsystem_register(&mach) == XIUL_E_DUPLICATE);
-    assert(xiul_subsystem_register(&platform) == XIUL_OK);
+    assert(xiul_subsystem_register(&orphan) == XIUL_OK);
     assert(xiul_subsystem_validate() == XIUL_E_DEPENDENCY);
+}
+
+static void test_cycle_detection(void)
+{
+    reset();
+    assert(xiul_subsystem_register(&cycle_a) == XIUL_OK);
+    assert(xiul_subsystem_register(&cycle_b) == XIUL_OK);
+    assert(xiul_subsystem_validate() == XIUL_E_CYCLE);
 }
 
 static void test_startup_rollback(void)
@@ -92,6 +101,7 @@ int main(void)
 {
     test_dependency_order();
     test_duplicate_and_missing_dependency();
+    test_cycle_detection();
     test_startup_rollback();
     puts("XIUL subsystem tests: PASS");
     return 0;
