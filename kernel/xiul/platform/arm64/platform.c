@@ -1,4 +1,5 @@
 #include "xiul/platform.h"
+#include "xiul/pci_host.h"
 
 #define PL011_DR 0x00u
 #define PL011_FR 0x18u
@@ -10,6 +11,11 @@
 #define PL011_FR_TXFF (1u << 5)
 
 static volatile uint32_t *uart_registers;
+static xiul_arm64_pci_ecam_context_t pci_ecam_context;
+static uint64_t pci_ecam_virtual;
+static uint16_t pci_segment;
+static uint8_t pci_first_bus, pci_last_bus;
+static unsigned int platform_initialized;
 
 static void serial_initialize(const xiul_boot_info_t *boot_info)
 {
@@ -36,8 +42,23 @@ static void serial_initialize(const xiul_boot_info_t *boot_info)
 xiul_status_t xiul_arch_early_init(const xiul_boot_info_t *boot_info)
 {
     serial_initialize(boot_info);
+    pci_ecam_virtual = boot_info->pci_ecam_virtual;
+    pci_segment = boot_info->pci_segment;
+    pci_first_bus = boot_info->pci_first_bus;
+    pci_last_bus = boot_info->pci_last_bus;
+    platform_initialized = 1;
     xiul_platform_console_write("XIUL AArch64 platform initialized\r\n");
     return XIUL_OK;
+}
+
+xiul_status_t xiul_platform_get_pci_host(xiul_pci_host_t *host)
+{
+    if (!platform_initialized) return XIUL_E_STATE;
+    if (pci_ecam_virtual == 0 || pci_first_bus > pci_last_bus)
+        return XIUL_E_UNSUPPORTED;
+    return xiul_pci_host_init_arm64_ecam(host, &pci_ecam_context,
+        (volatile void *)(uintptr_t)pci_ecam_virtual, pci_segment,
+        pci_first_bus, pci_last_bus);
 }
 
 void xiul_platform_console_putc(char character)
