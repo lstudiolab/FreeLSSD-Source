@@ -36,6 +36,9 @@ $(BUILD_DIR)/test_vfs: bsd/vfs/vfs.c tests/test_vfs.c include/xiul/vfs.h include
 $(BUILD_DIR)/test_posix: bsd/posix/syscall.c tests/test_posix.c include/xiul/posix.h include/xiul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING bsd/posix/syscall.c tests/test_posix.c -o $@
 
+$(BUILD_DIR)/test_posix_vfs: bsd/vfs/vfs.c bsd/posix/fd.c tests/test_posix_vfs.c include/xiul/vfs.h include/xiul/posix.h include/xiul/status.h | $(BUILD_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) bsd/vfs/vfs.c bsd/posix/fd.c tests/test_posix_vfs.c -o $@
+
 $(BUILD_DIR)/test_nke: bsd/nke/nke.c tests/test_nke.c include/xiul/nke.h include/xiul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING bsd/nke/nke.c tests/test_nke.c -o $@
 
@@ -45,7 +48,7 @@ $(BUILD_DIR)/test_platform: core/platform.c tests/test_platform.c include/xiul/p
 $(BUILD_DIR)/test_device: core/device.c tests/test_device.c include/xiul/device.h include/xiul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING core/device.c tests/test_device.c -o $@
 
-test: $(BUILD_DIR)/test_subsystem $(BUILD_DIR)/test_stream $(BUILD_DIR)/test_device $(BUILD_DIR)/test_platform $(BUILD_DIR)/test_kernel $(BUILD_DIR)/test_pci $(BUILD_DIR)/test_linux_pci $(BUILD_DIR)/test_net $(BUILD_DIR)/test_vfs $(BUILD_DIR)/test_posix $(BUILD_DIR)/test_nke
+test: $(BUILD_DIR)/test_subsystem $(BUILD_DIR)/test_stream $(BUILD_DIR)/test_device $(BUILD_DIR)/test_platform $(BUILD_DIR)/test_kernel $(BUILD_DIR)/test_pci $(BUILD_DIR)/test_linux_pci $(BUILD_DIR)/test_net $(BUILD_DIR)/test_vfs $(BUILD_DIR)/test_posix $(BUILD_DIR)/test_posix_vfs $(BUILD_DIR)/test_nke
 	./$(BUILD_DIR)/test_subsystem
 	./$(BUILD_DIR)/test_stream
 	./$(BUILD_DIR)/test_device
@@ -56,6 +59,7 @@ test: $(BUILD_DIR)/test_subsystem $(BUILD_DIR)/test_stream $(BUILD_DIR)/test_dev
 	./$(BUILD_DIR)/test_net
 	./$(BUILD_DIR)/test_vfs
 	./$(BUILD_DIR)/test_posix
+	./$(BUILD_DIR)/test_posix_vfs
 	./$(BUILD_DIR)/test_nke
 
 $(BUILD_DIR)/x86_64:
