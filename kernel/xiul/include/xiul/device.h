@@ -37,12 +37,18 @@ typedef struct xiul_device {
     const struct xiul_driver *bound_driver;
 } xiul_device_t;
 
-typedef xiul_status_t (*xiul_driver_probe_context_fn)(xiul_device_t *, void *);\ntypedef void (*xiul_driver_remove_context_fn)(xiul_device_t *, void *);\n\ntypedef struct xiul_driver {
+typedef xiul_status_t (*xiul_driver_probe_context_fn)(xiul_device_t *, void *);
+typedef void (*xiul_driver_remove_context_fn)(xiul_device_t *, void *);
+
+typedef struct xiul_driver {
     const char *name;
     const xiul_device_id_t *id_table;
     size_t id_count;
     xiul_status_t (*probe)(xiul_device_t *device);
     void (*remove)(xiul_device_t *device);
+    void *context;
+    xiul_driver_probe_context_fn probe_context;
+    xiul_driver_remove_context_fn remove_context;
 } xiul_driver_t;
 
 /*
