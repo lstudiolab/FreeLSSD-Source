@@ -19,8 +19,8 @@ This document separates imported source, XIUL-owned tested code and actual upstr
 
 The XIUL workflow currently runs:
 - source-layout and upstream-manifest audit;
-- host tests for subsystem lifecycle, I/O stream, device/driver registry, boot-info validation, Linux PCI bridge, network interfaces, VFS mount lifecycle, POSIX syscall dispatch and NKE hooks;
-- freestanding object compilation of XIUL-owned x86_64 and AArch64 early platform code.
+- host tests for subsystem lifecycle, I/O stream, device/driver registry, boot-info validation, synthetic PCI enumeration/BAR mapping/driver binding, Linux PCI bridge, network interfaces, VFS mount lifecycle, POSIX syscall dispatch and NKE hooks;
+- freestanding object compilation of XIUL-owned x86_64 and AArch64 early platform and PCI configuration-space backend code.
 
 It does not run:
 - a build of imported Mach `osfmk/`;
