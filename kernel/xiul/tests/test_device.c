@@ -20,7 +20,7 @@ static const xiul_device_id_t ids[] = {
     {XIUL_BUS_PCI, 0x1234, 0x5678, XIUL_ID_ANY, XIUL_ID_ANY}
 };
 static const xiul_driver_t driver = {
-    "test-pci-driver", ids, 1, probe_ok, remove_device
+    "test-pci-driver", ids, 1, probe_ok, remove_device, 0, 0, 0
 };
 
 int main(void)
