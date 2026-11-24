@@ -15,9 +15,8 @@ jobs:
   source-audit:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out FreeLSSD
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: Verify XIUL source layout
+      - uses: actions/checkout@v4
+      - name: Run XIUL source audit
         run: make -C kernel/xiul source-audit
+      - name: Build and test XIUL core
+        run: make -C kernel/xiul test
