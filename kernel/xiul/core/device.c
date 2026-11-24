@@ -43,7 +43,7 @@ static void try_bind(xiul_device_t *device)
     for (i = 0; i < drivers_used; ++i) {
         const xiul_driver_t *driver = drivers[i];
         if (!driver_matches(driver, device)) continue;
-        if (driver->probe(device) == XIUL_OK) {
+        if ((driver->probe_context != 0\n                ? driver->probe_context(device, driver->context)\n                : driver->probe(device)) == XIUL_OK) {
             device->bound_driver = driver;
             return;
         }
