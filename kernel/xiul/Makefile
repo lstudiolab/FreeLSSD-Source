@@ -1,10 +1,23 @@
-# XIUL host tests plus freestanding x86_64/AArch64 platform object builds.
+# XIUL host tests plus complete XIUL-owned freestanding core object builds.
+# This does not claim to build imported upstream Mach/Linux/FreeBSD sources.
 CC ?= cc
 CC_ARM64 ?= aarch64-linux-gnu-gcc
+LD_ARM64 ?= aarch64-linux-gnu-ld
 BUILD_DIR ?= .build
 CPPFLAGS += -Iinclude -Iio
 CFLAGS ?= -std=c11 -O2 -Wall -Wextra -Werror -pedantic
-FREESTANDING_CFLAGS = -std=c11 -O2 -Wall -Wextra -Werror -ffreestanding -fno-builtin -fno-stack-protector -fno-pie
+FREESTANDING_CFLAGS = -std=c11 -O2 -Wall -Wextra -Werror -ffreestanding -fno-builtin -fno-stack-protector -fno-pic -fno-pie
+X86_64_CFLAGS = $(FREESTANDING_CFLAGS) -m64 -mno-red-zone -mcmodel=kernel
+ARM64_CFLAGS = $(FREESTANDING_CFLAGS) -mgeneral-regs-only
+
+XIUL_COMMON_SOURCES = \
+	core/subsystem.c core/device.c core/platform.c core/kernel.c core/pci.c \
+	io/stream.c compat/linux/pci.c \
+	bsd/net/net.c bsd/vfs/vfs.c bsd/posix/syscall.c bsd/posix/fd.c bsd/nke/nke.c
+XIUL_X86_64_SOURCES = $(XIUL_COMMON_SOURCES) platform/x86_64/platform.c platform/x86_64/pci.c
+XIUL_ARM64_SOURCES = $(XIUL_COMMON_SOURCES) platform/arm64/platform.c platform/arm64/pci.c
+X86_64_OBJECTS = $(patsubst %.c,$(BUILD_DIR)/x86_64/%.o,$(XIUL_X86_64_SOURCES))
+ARM64_OBJECTS = $(patsubst %.c,$(BUILD_DIR)/arm64/%.o,$(XIUL_ARM64_SOURCES))
 
 .PHONY: all test source-audit arch-build x86_64-build arm64-build clean
 all: test arch-build
@@ -62,21 +75,25 @@ test: $(BUILD_DIR)/test_subsystem $(BUILD_DIR)/test_stream $(BUILD_DIR)/test_dev
 	./$(BUILD_DIR)/test_posix_vfs
 	./$(BUILD_DIR)/test_nke
 
-$(BUILD_DIR)/x86_64:
-	mkdir -p $@
+$(BUILD_DIR)/x86_64/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(X86_64_CFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/arm64:
-	mkdir -p $@
+$(BUILD_DIR)/arm64/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC_ARM64) $(CPPFLAGS) $(ARM64_CFLAGS) -c $< -o $@
 
-x86_64-build: | $(BUILD_DIR)/x86_64
-	$(CC) $(CPPFLAGS) $(FREESTANDING_CFLAGS) -m64 -mno-red-zone -mcmodel=kernel -c core/platform.c -o $(BUILD_DIR)/x86_64/platform-core.o
-	$(CC) $(CPPFLAGS) $(FREESTANDING_CFLAGS) -m64 -mno-red-zone -mcmodel=kernel -c platform/x86_64/platform.c -o $(BUILD_DIR)/x86_64/platform-arch.o
-	$(CC) $(CPPFLAGS) $(FREESTANDING_CFLAGS) -m64 -mno-red-zone -mcmodel=kernel -c platform/x86_64/pci.c -o $(BUILD_DIR)/x86_64/pci-host.o
+$(BUILD_DIR)/x86_64/xiul-core.o: $(X86_64_OBJECTS)
+	$(CC) -m64 -nostdlib -r $^ -o $@
 
-arm64-build: | $(BUILD_DIR)/arm64
-	$(CC_ARM64) $(CPPFLAGS) $(FREESTANDING_CFLAGS) -mgeneral-regs-only -c core/platform.c -o $(BUILD_DIR)/arm64/platform-core.o
-	$(CC_ARM64) $(CPPFLAGS) $(FREESTANDING_CFLAGS) -mgeneral-regs-only -c platform/arm64/platform.c -o $(BUILD_DIR)/arm64/platform-arch.o
-	$(CC_ARM64) $(CPPFLAGS) $(FREESTANDING_CFLAGS) -mgeneral-regs-only -c platform/arm64/pci.c -o $(BUILD_DIR)/arm64/pci-host.o
+$(BUILD_DIR)/arm64/xiul-core.o: $(ARM64_OBJECTS)
+	$(LD_ARM64) -r $^ -o $@
+
+x86_64-build: $(BUILD_DIR)/x86_64/xiul-core.o
+	@echo "XIUL x86_64 freestanding core objects: PASS"
+
+arm64-build: $(BUILD_DIR)/arm64/xiul-core.o
+	@echo "XIUL AArch64 freestanding core objects: PASS"
 
 arch-build: x86_64-build arm64-build
 
