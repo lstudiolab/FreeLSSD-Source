@@ -91,8 +91,7 @@ static xiul_status_t driver_probe(xiul_linux_pci_device_t *device,
 }
 static void driver_remove(xiul_linux_pci_device_t *device)
 {
-    xiul_linux_pci_clear_master(device);
-    xiul_linux_pci_disable_device(device);
+    (void)device;
     ++removed;
 }
 
