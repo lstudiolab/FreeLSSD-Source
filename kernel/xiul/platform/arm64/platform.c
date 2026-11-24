@@ -18,7 +18,7 @@ static void serial_initialize(const xiul_boot_info_t *boot_info)
         boot_info->uart_clock_hz == 0 ||
         boot_info->uart_baud_rate == 0) return;
 
-    uart_registers = (volatile uint32_t *)(uintptr_t)boot_info->uart_physical;
+    uart_registers = (volatile uint32_t *)(uintptr_t)boot_info->uart_virtual;
     uart_registers[PL011_CR / 4u] = 0;
     uart_registers[PL011_ICR / 4u] = 0x7ffu;
     divisor = boot_info->uart_clock_hz / (16u * boot_info->uart_baud_rate);
