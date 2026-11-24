@@ -94,7 +94,7 @@ static xiul_status_t probe_bar(const xiul_pci_host_t *host,
     if ((original_low & 1u) != 0) {
         pci->bar_flags[bar] = XIUL_LINUX_PCI_BAR_IO;
         status = write16(host, bus, device, function, 0x04u,
-                         (uint16_t)(command & ~UINT16_C(3)));
+                         (uint16_t)(command & ~UINT16_C(7)));
         if (status != XIUL_OK) return status;
         status = host->write32(host->context, bus, device, function,
                                offset, UINT32_MAX);
@@ -123,7 +123,7 @@ static xiul_status_t probe_bar(const xiul_pci_host_t *host,
     }
 
     status = write16(host, bus, device, function, 0x04u,
-                     (uint16_t)(command & ~UINT16_C(3)));
+                     (uint16_t)(command & ~UINT16_C(7)));
     if (status != XIUL_OK) return status;
     status = host->write32(host->context, bus, device, function, offset, UINT32_MAX);
     if (status == XIUL_OK && type == 2u)
