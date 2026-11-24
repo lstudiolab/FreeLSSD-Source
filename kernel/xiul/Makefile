@@ -1,8 +1,8 @@
 # XIUL host-side core tests and source-layout validation.
-# Upstream Mach/Linux/FreeBSD kernel builds are separate porting tasks.
+# Upstream Mach/Linux/FreeBSD kernel builds remain architecture-specific ports.
 CC ?= cc
 BUILD_DIR ?= .build
-CPPFLAGS += -Iinclude
+CPPFLAGS += -Iinclude -Iio
 CFLAGS ?= -std=c11 -O2 -Wall -Wextra -Werror -pedantic
 
 .PHONY: all test source-audit clean
@@ -14,8 +14,12 @@ $(BUILD_DIR):
 $(BUILD_DIR)/test_subsystem: core/subsystem.c tests/test_subsystem.c include/xiul/subsystem.h include/xiul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING core/subsystem.c tests/test_subsystem.c -o $@
 
-test: $(BUILD_DIR)/test_subsystem
+$(BUILD_DIR)/test_stream: io/stream.c tests/test_stream.c io/stream.h include/xiul/status.h | $(BUILD_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) io/stream.c tests/test_stream.c -o $@
+
+test: $(BUILD_DIR)/test_subsystem $(BUILD_DIR)/test_stream
 	./$(BUILD_DIR)/test_subsystem
+	./$(BUILD_DIR)/test_stream
 
 source-audit:
 	@set -eu; \
