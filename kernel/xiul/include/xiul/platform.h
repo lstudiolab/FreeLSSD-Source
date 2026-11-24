@@ -11,6 +11,9 @@ extern "C" {
 
 typedef uintptr_t xiul_irq_state_t;
 
+/* Internal architecture hook implemented by exactly one platform target. */
+xiul_status_t xiul_arch_early_init(const xiul_boot_info_t *boot_info);
+
 /* Called once by the architecture entry path before general subsystem startup. */
 xiul_status_t xiul_platform_initialize(const xiul_boot_info_t *boot_info);
 void xiul_platform_console_write(const char *text);
