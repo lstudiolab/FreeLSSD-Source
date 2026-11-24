@@ -13,6 +13,7 @@ static volatile uint32_t *uart_registers;
 
 static void serial_initialize(const xiul_boot_info_t *boot_info)
 {
+    uint64_t denominator;
     uint32_t divisor, remainder;
     if (boot_info->uart_virtual == 0 ||
         boot_info->uart_clock_hz == 0 ||
@@ -21,12 +22,13 @@ static void serial_initialize(const xiul_boot_info_t *boot_info)
     uart_registers = (volatile uint32_t *)(uintptr_t)boot_info->uart_virtual;
     uart_registers[PL011_CR / 4u] = 0;
     uart_registers[PL011_ICR / 4u] = 0x7ffu;
-    divisor = boot_info->uart_clock_hz / (16u * boot_info->uart_baud_rate);
-    remainder = boot_info->uart_clock_hz % (16u * boot_info->uart_baud_rate);
+    denominator = UINT64_C(16) * boot_info->uart_baud_rate;
+    divisor = (uint32_t)(boot_info->uart_clock_hz / denominator);
+    remainder = (uint32_t)(boot_info->uart_clock_hz % denominator);
+    if (divisor == 0) { uart_registers = 0; return; }
     uart_registers[PL011_IBRD / 4u] = divisor;
     uart_registers[PL011_FBRD / 4u] =
-        (remainder * 64u + (8u * boot_info->uart_baud_rate)) /
-        (16u * boot_info->uart_baud_rate);
+        (uint32_t)(((uint64_t)remainder * 64u + denominator / 2u) / denominator);
     uart_registers[PL011_LCRH / 4u] = (3u << 5) | (1u << 4);
     uart_registers[PL011_CR / 4u] = (1u << 9) | (1u << 8) | 1u;
 }
@@ -41,10 +43,14 @@ xiul_status_t xiul_arch_early_init(const xiul_boot_info_t *boot_info)
 void xiul_platform_console_putc(char character)
 {
     if (uart_registers == 0) return;
-    while ((uart_registers[PL011_FR / 4u] & PL011_FR_TXFF) != 0) {
-        __asm__ volatile ("yield" : : : "memory");
+    {
+        unsigned int timeout = 1000000u;
+        while ((uart_registers[PL011_FR / 4u] & PL011_FR_TXFF) != 0 && timeout != 0) {
+            --timeout;
+            __asm__ volatile ("yield" : : : "memory");
+        }
+        if (timeout != 0) uart_registers[PL011_DR / 4u] = (uint32_t)(uint8_t)character;
     }
-    uart_registers[PL011_DR / 4u] = (uint32_t)(uint8_t)character;
 }
 
 void xiul_platform_console_write(const char *text)
