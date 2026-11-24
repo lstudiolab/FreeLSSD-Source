@@ -6,6 +6,7 @@
 typedef struct {
     volatile uint8_t *ecam_virtual_base;
     uint8_t first_bus;
+    uint8_t last_bus;
     uint16_t segment;
 } xiul_arm64_pci_ecam_context_t;
 
