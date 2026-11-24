@@ -89,7 +89,7 @@ static xiul_status_t probe_bar(const xiul_pci_host_t *host,
     status = read16(host, bus, device, function, 0x04u, &command);
     if (status != XIUL_OK) return status;
 
-    if ((original_low & 1u) != 0) {
+    if ((original_low & 1u) != 0) {\n        pci->bar_flags[bar] = XIUL_LINUX_PCI_BAR_IO;
         status = write16(host, bus, device, function, 0x04u,
                          (uint16_t)(command & ~UINT16_C(3)));
         if (status != XIUL_OK) return status;
@@ -110,7 +110,7 @@ static xiul_status_t probe_bar(const xiul_pci_host_t *host,
         return XIUL_OK;
     }
 
-    type = (original_low >> 1) & 3u;
+    type = (original_low >> 1) & 3u;\n    pci->bar_flags[bar] = XIUL_LINUX_PCI_BAR_MEMORY;\n    if ((original_low & 8u) != 0) pci->bar_flags[bar] |= XIUL_LINUX_PCI_BAR_PREFETCHABLE;\n    if (type == 2u) pci->bar_flags[bar] |= XIUL_LINUX_PCI_BAR_64BIT;
     if (type == 3u) return XIUL_E_UNSUPPORTED;
     if (type == 2u) {
         if (bar + 1u >= XIUL_LINUX_PCI_BAR_COUNT) return XIUL_E_INVALID;
@@ -196,7 +196,7 @@ static xiul_status_t enumerate_function(const xiul_pci_host_t *host,
     slot->pci.bus_number = bus;
     slot->pci.device_number = device;
     slot->pci.function_number = function;
-    slot->pci.irq = interrupt_register & 0xffu;
+    slot->pci.irq = interrupt_register & 0xffu;\n    slot->pci.host = host;\n    slot->pci.original_command = command;
     make_name(slot->pci.name_storage, bus, device, function);
     slot->pci.device.name = slot->pci.name_storage;
 
