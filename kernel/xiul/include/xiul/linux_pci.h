@@ -19,6 +19,7 @@ typedef struct {
 } xiul_linux_pci_id_t;
 
 /* The XIUL device is first so the registry callback can recover this object. */
+struct xiul_pci_host;
 typedef struct {
     xiul_device_t device;
     char name_storage[24];
