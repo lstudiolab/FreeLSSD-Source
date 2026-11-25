@@ -15,7 +15,7 @@ This status distinguishes imported source, XIUL-owned tested code and upstream i
 - Linux driver source remains in the Linux tree. The XIUL Linux driver environment must preserve the Linux driver model and implement the kernel APIs required by each selected driver.
 - BSD provides networking, filesystems, POSIX syscall semantics and Unix kernel functionality.
 - XIUL owns device arbitration, I/O streams and integration contracts.
-- Stela owns user space, GUI, frameworks, APIs, services and utilities.
+- FreeLSSD owns user space, GUI, frameworks, APIs, services and utilities.
 
 A physical device may be owned by one Mach-native or Linux driver at a time. Linux network devices connect to the BSD network stack through an explicit packet adapter.
 
