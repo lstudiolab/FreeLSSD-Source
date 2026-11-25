@@ -3,6 +3,11 @@
  * Copyright (c) 2026 L,Studio.
  */
 
+/*
+ * Modified by L,Studio.
+ * Copyright (c) 2026 L,Studio.
+ */
+
 #include "xiul/nke.h"
 
 static const xiul_nke_hook_t *hooks[XIUL_NKE_MAX_HOOKS];
