@@ -43,6 +43,11 @@ int main(void)
     info.memory_map_virtual = 0xffff800000001000ULL;
     info.memory_map_entries = UINT64_MAX / sizeof(xiul_memory_region_t) + 1u;
     assert(xiul_platform_initialize(&info) == XIUL_E_INVALID);
+    info.memory_map_entries = 1;
+    info.memory_map_physical = UINT64_MAX - 7u;
+    info.memory_map_virtual = 0xffff800000001000ULL;
+    assert(xiul_platform_initialize(&info) == XIUL_E_INVALID);
+    assert(arch_calls == 0);
     info.memory_map_entries = 0;
     info.memory_map_physical = 0;
     info.memory_map_virtual = 0;
