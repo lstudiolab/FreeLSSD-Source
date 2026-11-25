@@ -1,0 +1,47 @@
+# This file has been modified by L,Studio.
+# Copyright (c) 2026 L,Studio. All rights reserved.
+
+name: XIUL Kernel CI
+
+on:
+  push:
+    paths:
+      - "kernel/xiul/**"
+      - ".github/workflows/xiul.yml"
+  pull_request:
+    paths:
+      - "kernel/xiul/**"
+      - ".github/workflows/xiul.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  xiul:
+    name: XIUL tests and architecture links
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Install AArch64 cross toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
+      - name: Audit source layout
+        run: make -C kernel/xiul source-audit
+      - name: Run host tests
+        run: make -C kernel/xiul test
+      - name: Build x86_64 ELF
+        run: make -C kernel/xiul x86_64-build
+      - name: Build AArch64 ELF
+        run: make -C kernel/xiul arm64-build CC_ARM64=aarch64-linux-gnu-gcc LD_ARM64=aarch64-linux-gnu-ld
+      - name: Publish kernel images
+        uses: actions/upload-artifact@v4
+        with:
+          name: xiul-elf-images
+          path: |
+            kernel/xiul/.build/x86_64/xiul.elf
+            kernel/xiul/.build/arm64/xiul.elf
+          if-no-files-found: error
