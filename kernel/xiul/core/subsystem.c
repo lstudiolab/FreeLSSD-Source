@@ -179,7 +179,7 @@ xiul_status_t xiul_subsystem_start_all(xiul_kernel_context_t *context)
         result = d->initialize(context);
         if (result != XIUL_OK) {
             xiul_subsystem_stop_all(context);
-            return XIUL_E_INIT;
+            return result;
         }
         registry[index].started = 1;
         ++started_count;
