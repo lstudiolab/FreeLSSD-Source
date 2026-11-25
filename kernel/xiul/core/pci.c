@@ -1,3 +1,8 @@
+/*
+ * Modified by L,Studio.
+ * Copyright (c) 2026 L,Studio.
+ */
+
 #include "xiul/pci.h"
 #include "xiul/device.h"
 #include "xiul/linux_pci.h"
