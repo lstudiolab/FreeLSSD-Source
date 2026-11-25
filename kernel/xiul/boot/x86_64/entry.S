@@ -31,3 +31,5 @@ xiul_boot_stack_bottom:
     .skip 65536
 .global xiul_boot_stack_top
 xiul_boot_stack_top:
+
+.section .note.GNU-stack,"",@progbits
