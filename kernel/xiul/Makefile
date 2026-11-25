@@ -14,7 +14,7 @@ X86_64_CFLAGS = $(FREESTANDING_CFLAGS) -m64 -mno-red-zone -mcmodel=kernel
 ARM64_CFLAGS = $(FREESTANDING_CFLAGS) -mgeneral-regs-only
 
 XIUL_COMMON_SOURCES = \
-	core/subsystem.c core/device.c core/platform.c core/kernel.c core/pci.c \
+	core/subsystem.c core/device.c core/platform.c core/kernel.c core/entry.c core/pci.c \
 	io/stream.c compat/linux/pci.c \
 	bsd/net/net.c bsd/vfs/vfs.c bsd/posix/syscall.c bsd/posix/fd.c bsd/nke/nke.c
 XIUL_X86_64_SOURCES = $(XIUL_COMMON_SOURCES) platform/x86_64/platform.c platform/x86_64/pci.c
@@ -86,29 +86,46 @@ $(BUILD_DIR)/arm64/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC_ARM64) $(CPPFLAGS) $(ARM64_CFLAGS) -c $< -o $@
 
+$(BUILD_DIR)/x86_64/entry.o: boot/x86_64/entry.S
+	@mkdir -p $(dir $@)
+	$(CC) $(X86_64_CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/arm64/entry.o: boot/arm64/entry.S
+	@mkdir -p $(dir $@)
+	$(CC_ARM64) $(ARM64_CFLAGS) -c $< -o $@
+
 $(BUILD_DIR)/x86_64/xiul-core.o: $(X86_64_OBJECTS)
 	$(CC) -m64 -nostdlib -r $^ -o $@
 
 $(BUILD_DIR)/arm64/xiul-core.o: $(ARM64_OBJECTS)
 	$(LD_ARM64) -r $^ -o $@
 
-x86_64-build: $(BUILD_DIR)/x86_64/xiul-core.o
-	@echo "XIUL x86_64 freestanding core objects: PASS"
+$(BUILD_DIR)/x86_64/xiul.elf: $(BUILD_DIR)/x86_64/entry.o $(BUILD_DIR)/x86_64/xiul-core.o boot/x86_64/linker.ld
+	$(CC) -nostdlib -no-pie -Wl,--build-id=none -Wl,-T,boot/x86_64/linker.ld $(BUILD_DIR)/x86_64/entry.o $(BUILD_DIR)/x86_64/xiul-core.o -o $@
 
-arm64-build: $(BUILD_DIR)/arm64/xiul-core.o
-	@echo "XIUL AArch64 freestanding core objects: PASS"
+x86_64-build: $(BUILD_DIR)/x86_64/xiul.elf
+	@echo "XIUL x86_64 ELF image link: PASS"
+
+$(BUILD_DIR)/arm64/xiul.elf: $(BUILD_DIR)/arm64/entry.o $(BUILD_DIR)/arm64/xiul-core.o boot/arm64/linker.ld
+	$(LD_ARM64) -T boot/arm64/linker.ld $(BUILD_DIR)/arm64/entry.o $(BUILD_DIR)/arm64/xiul-core.o -o $@
+
+arm64-build: $(BUILD_DIR)/arm64/xiul.elf
+	@echo "XIUL AArch64 ELF image link: PASS"
 
 arch-build: x86_64-build arm64-build
 
 source-audit:
 	@set -eu; \
-	for path in mach linux freebsd core include/xiul io compat/linux bsd/net bsd/vfs bsd/posix bsd/nke platform/x86_64 platform/arm64 tests; do \
+	for path in mach linux freebsd core include/xiul io compat/linux bsd/net bsd/vfs bsd/posix bsd/nke platform/x86_64 platform/arm64 boot/x86_64 boot/arm64 tests; do \
 		test -d "$(CURDIR)/$$path" || { echo "missing XIUL source root: $$path"; exit 1; }; \
 	done
 	@test -f xiul.toml
 	@test -f README.md
 	@test -f ARCHITECTURE.md
 	@test -f UPSTREAM-SOURCES.txt
+	@test -f boot/README.md
+	@test -f boot/x86_64/linker.ld
+	@test -f boot/arm64/linker.ld
 	@grep -q '^mach-osfmk ' UPSTREAM-SOURCES.txt
 	@grep -q '^linux ' UPSTREAM-SOURCES.txt
 	@grep -q '^freebsd ' UPSTREAM-SOURCES.txt
