@@ -15,7 +15,8 @@ xiul_arch_entry:
     adrp x9, xiul_boot_stack_top
     add x9, x9, :lo12:xiul_boot_stack_top
     mov sp, x9
-    and sp, sp, #-16
+    and x9, x9, #-16
+    mov sp, x9
     mov x29, xzr
     bl xiul_kernel_entry
 
