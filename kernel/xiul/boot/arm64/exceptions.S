@@ -11,7 +11,16 @@ xiul_arm64_vectors:
 xiul_arm64_exception_initialize:
  mrs x1, CurrentEL
  cmp x1, #4
- b.ne 1f
+ b.eq 1f
+ cmp x1, #8
+ b.ne 2f
+ adrp x0, xiul_arm64_vectors
+ add x0, x0, :lo12:xiul_arm64_vectors
+ msr VBAR_EL2, x0
+ dsb sy
+ isb
+ mov x0, #0
+ ret
  adrp x0, xiul_arm64_vectors
  add x0, x0, :lo12:xiul_arm64_vectors
  msr VBAR_EL1, x0
@@ -20,6 +29,14 @@ xiul_arm64_exception_initialize:
  mov x0, #0
  ret
 1:
+ adrp x0, xiul_arm64_vectors
+ add x0, x0, :lo12:xiul_arm64_vectors
+ msr VBAR_EL1, x0
+ dsb sy
+ isb
+ mov x0, #0
+ ret
+2:
  mov x0, #1
  ret
 xiul_arm64_exception_entry:
