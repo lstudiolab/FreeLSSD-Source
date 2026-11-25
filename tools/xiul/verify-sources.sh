@@ -1,5 +1,7 @@
-undefined# Modified by L,Studio. Copyright (c) 2026 L,Studio.
 #!/bin/sh
+# This file has been modified by L,Studio.
+# Copyright (c) 2026 L,Studio. All rights reserved.
+
 set -eu
 
 root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
