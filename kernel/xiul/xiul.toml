@@ -50,10 +50,10 @@ posix = "bsd/posix"
 nke = "bsd/nke"
 platform = "platform"
 
-[stela]
+[freelssd]
 user_space_owner = "L,Studio"
-gui = "Stela"
-native_api = "Stela API"
+gui = "FreeLSSD UI"
+native_api = "FreeLSSD API"
 compatibility_apis = ["BSD", "POSIX", "Classic", "QuickTime"]
 
 [interfaces]
