@@ -1,3 +1,8 @@
+<!--
+This file has been modified by L,Studio.
+Copyright (c) 2026 L,Studio. All rights reserved.
+-->
+
 # Linux Driver Compatibility Layer
 
 Linux source is used as a pool for selected hardware drivers. Linux is not a second kernel and its scheduler, VM, networking stack, VFS or userspace ABI are not XIUL subsystems.

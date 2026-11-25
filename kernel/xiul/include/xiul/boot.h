@@ -1,3 +1,9 @@
+/*
+ * This file has been modified by L,Studio.
+ *
+ * Copyright (c) 2026 L,Studio. All rights reserved.
+ */
+
 #ifndef XIUL_BOOT_H
 #define XIUL_BOOT_H
 

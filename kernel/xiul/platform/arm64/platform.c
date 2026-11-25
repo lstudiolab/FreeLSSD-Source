@@ -1,3 +1,9 @@
+/*
+ * This file has been modified by L,Studio.
+ *
+ * Copyright (c) 2026 L,Studio. All rights reserved.
+ */
+
 #include "xiul/platform.h"
 #include "xiul/pci_host.h"
 

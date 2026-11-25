@@ -1,3 +1,8 @@
+<!--
+This file has been modified by L,Studio.
+Copyright (c) 2026 L,Studio. All rights reserved.
+-->
+
 # XIUL I/O Streams
 
 The first executable stream primitive is `stream.c`: a bounded, caller-backed, nonblocking single-producer/single-consumer byte ring.

@@ -1,3 +1,9 @@
+/*
+ * This file has been modified by L,Studio.
+ *
+ * Copyright (c) 2026 L,Studio. All rights reserved.
+ */
+
 #include <stdatomic.h>
 #include "xiul/pci_host.h"
 #include "xiul/platform.h"

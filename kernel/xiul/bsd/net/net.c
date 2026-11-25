@@ -1,11 +1,7 @@
 /*
- * Modified by L,Studio.
- * Copyright (c) 2026 L,Studio.
- */
-
-/*
- * Modified by L,Studio.
- * Copyright (c) 2026 L,Studio.
+ * This file has been modified by L,Studio.
+ *
+ * Copyright (c) 2026 L,Studio. All rights reserved.
  */
 
 #include "xiul/net.h"

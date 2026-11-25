@@ -1,3 +1,8 @@
+<!--
+This file has been modified by L,Studio.
+Copyright (c) 2026 L,Studio. All rights reserved.
+-->
+
 # XIUL BSD Service Adapters
 
 Selected FreeBSD components provide BSD-derived networking and filesystem functionality. They must be adapted to XIUL-owned interfaces rather than linked as a second complete kernel.

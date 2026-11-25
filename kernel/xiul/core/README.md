@@ -1,3 +1,8 @@
+<!--
+This file has been modified by L,Studio.
+Copyright (c) 2026 L,Studio. All rights reserved.
+-->
+
 # XIUL Core
 
 The executable XIUL-owned core currently contains:

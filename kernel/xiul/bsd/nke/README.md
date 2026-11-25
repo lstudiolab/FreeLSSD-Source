@@ -1,3 +1,8 @@
+<!--
+This file has been modified by L,Studio.
+Copyright (c) 2026 L,Studio. All rights reserved.
+-->
+
 # Network Kernel Extensions
 
 XIUL-owned code now provides a bounded NKE hook registry, stable priority ordering, packet callback dispatch, drop short-circuiting and unregister behavior.

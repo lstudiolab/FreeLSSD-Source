@@ -1,3 +1,9 @@
+/*
+ * This file has been modified by L,Studio.
+ *
+ * Copyright (c) 2026 L,Studio. All rights reserved.
+ */
+
 #ifndef XIUL_POSIX_H
 #define XIUL_POSIX_H
 #include <stddef.h>

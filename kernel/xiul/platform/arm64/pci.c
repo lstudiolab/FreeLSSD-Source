@@ -1,3 +1,9 @@
+/*
+ * This file has been modified by L,Studio.
+ *
+ * Copyright (c) 2026 L,Studio. All rights reserved.
+ */
+
 #include "xiul/pci_host.h"
 
 static volatile uint8_t *ecam_address(xiul_arm64_pci_ecam_context_t *context,

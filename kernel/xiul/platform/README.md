@@ -1,3 +1,8 @@
+<!--
+This file has been modified by L,Studio.
+Copyright (c) 2026 L,Studio. All rights reserved.
+-->
+
 # XIUL architecture platform layer
 
 This directory is XIUL-owned glue; it does not replace the imported Mach machine-dependent implementation.

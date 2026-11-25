@@ -1,3 +1,6 @@
+# This file has been modified by L,Studio.
+# Copyright (c) 2026 L,Studio. All rights reserved.
+
 mach-osfmk https://github.com/lstudiolab/darwin-xnu.git#osfmk 2ff845c2e033bd0ff64b5b6aa6063a1f8f65aa32
 linux https://github.com/lstudiolab/linux.git 8d7fe9885c62fc9a95bf55d9db244d9672a8aadc
 freebsd https://github.com/lstudiolab/freebsd-src.git d5f0768e13f396337f01a62598a6b24bbfb84282
