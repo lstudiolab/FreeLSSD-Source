@@ -15,6 +15,7 @@
 #define PL011_CR 0x30u
 #define PL011_ICR 0x44u
 #define PL011_FR_TXFF (1u << 5)
+extern int xiul_arm64_exception_initialize(void);
 
 static volatile uint32_t *uart_registers;
 static xiul_arm64_pci_ecam_context_t pci_ecam_context;
@@ -48,6 +49,7 @@ static void serial_initialize(const xiul_boot_info_t *boot_info)
 xiul_status_t xiul_arch_early_init(const xiul_boot_info_t *boot_info)
 {
     serial_initialize(boot_info);
+    if (xiul_arm64_exception_initialize() != 0) return XIUL_E_STATE;
     pci_ecam_virtual = boot_info->pci_ecam_virtual;
     pci_segment = boot_info->pci_segment;
     pci_first_bus = boot_info->pci_first_bus;
