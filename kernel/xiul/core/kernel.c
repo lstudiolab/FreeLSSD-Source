@@ -63,7 +63,9 @@ static const xiul_subsystem_descriptor_t pci_subsystem = {
 xiul_status_t xiul_kernel_boot(const xiul_boot_info_t *boot_info)
 {
     xiul_status_t status;
-    if (boot_info == 0 || kernel_started) return XIUL_E_INVALID;
+    if (boot_info == 0 || kernel_started ||
+        boot_info->memory_map_entries == 0 ||
+        boot_info->memory_map_virtual == 0) return XIUL_E_INVALID;
     kernel_context.boot_info = *boot_info;
     kernel_context.pci_devices = 0;
     status = xiul_subsystem_register(&platform_subsystem);
