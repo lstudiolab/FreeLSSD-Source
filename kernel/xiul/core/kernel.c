@@ -8,13 +8,20 @@
 #include "xiul/platform.h"
 #include "xiul/pci.h"
 #include "xiul/subsystem.h"
+#include "xiul/memory.h"
 
 static xiul_kernel_context_t kernel_context;
 static unsigned int kernel_started;
 
 static xiul_status_t platform_subsystem_init(xiul_kernel_context_t *context)
 {
-    return xiul_platform_initialize(&context->boot_info);
+    xiul_status_t status = xiul_platform_initialize(&context->boot_info);
+    const xiul_memory_region_t *regions;
+    if (status != XIUL_OK) return status;
+    regions = context->boot_info.memory_map_entries == 0 ? 0 :
+        (const xiul_memory_region_t *)(uintptr_t)context->boot_info.memory_map_virtual;
+    return xiul_memory_initialize(regions,
+        (size_t)context->boot_info.memory_map_entries);
 }
 
 static void platform_subsystem_shutdown(xiul_kernel_context_t *context)
