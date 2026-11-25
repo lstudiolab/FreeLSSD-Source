@@ -14,7 +14,7 @@ X86_64_CFLAGS = $(FREESTANDING_CFLAGS) -m64 -mno-red-zone -mcmodel=kernel
 ARM64_CFLAGS = $(FREESTANDING_CFLAGS) -mgeneral-regs-only
 
 XIUL_COMMON_SOURCES = \
-	core/subsystem.c core/device.c core/platform.c core/kernel.c core/entry.c core/pci.c \
+	core/subsystem.c core/device.c core/platform.c core/kernel.c core/memory.c core/entry.c core/pci.c \
 	io/stream.c compat/linux/pci.c \
 	bsd/net/net.c bsd/vfs/vfs.c bsd/posix/syscall.c bsd/posix/fd.c bsd/nke/nke.c
 XIUL_X86_64_SOURCES = $(XIUL_COMMON_SOURCES) platform/x86_64/platform.c platform/x86_64/pci.c
@@ -34,8 +34,11 @@ $(BUILD_DIR)/test_subsystem: core/subsystem.c tests/test_subsystem.c include/xiu
 $(BUILD_DIR)/test_stream: io/stream.c tests/test_stream.c io/stream.h include/xiul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) io/stream.c tests/test_stream.c -o $@
 
-$(BUILD_DIR)/test_kernel: core/subsystem.c core/kernel.c tests/test_kernel.c include/xiul/kernel.h include/xiul/subsystem.h include/xiul/platform.h include/xiul/pci.h | $(BUILD_DIR)
-	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING core/subsystem.c core/kernel.c tests/test_kernel.c -o $@
+$(BUILD_DIR)/test_memory: core/memory.c tests/test_memory.c include/xiul/memory.h include/xiul/boot.h include/xiul/status.h | $(BUILD_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) core/memory.c tests/test_memory.c -o $@
+
+$(BUILD_DIR)/test_kernel: core/subsystem.c core/kernel.c core/memory.c tests/test_kernel.c include/xiul/kernel.h include/xiul/subsystem.h include/xiul/platform.h include/xiul/pci.h include/xiul/memory.h | $(BUILD_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING core/subsystem.c core/kernel.c core/memory.c tests/test_kernel.c -o $@
 
 $(BUILD_DIR)/test_pci: core/device.c core/pci.c compat/linux/pci.c tests/test_pci.c include/xiul/pci.h include/xiul/linux_pci.h include/xiul/device.h include/xiul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING core/device.c core/pci.c compat/linux/pci.c tests/test_pci.c -o $@
@@ -64,7 +67,7 @@ $(BUILD_DIR)/test_platform: core/platform.c tests/test_platform.c include/xiul/p
 $(BUILD_DIR)/test_device: core/device.c tests/test_device.c include/xiul/device.h include/xiul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING core/device.c tests/test_device.c -o $@
 
-test: $(BUILD_DIR)/test_subsystem $(BUILD_DIR)/test_stream $(BUILD_DIR)/test_device $(BUILD_DIR)/test_platform $(BUILD_DIR)/test_kernel $(BUILD_DIR)/test_pci $(BUILD_DIR)/test_linux_pci $(BUILD_DIR)/test_net $(BUILD_DIR)/test_vfs $(BUILD_DIR)/test_posix $(BUILD_DIR)/test_posix_vfs $(BUILD_DIR)/test_nke
+test: $(BUILD_DIR)/test_subsystem $(BUILD_DIR)/test_stream $(BUILD_DIR)/test_device $(BUILD_DIR)/test_platform $(BUILD_DIR)/test_kernel $(BUILD_DIR)/test_memory $(BUILD_DIR)/test_pci $(BUILD_DIR)/test_linux_pci $(BUILD_DIR)/test_net $(BUILD_DIR)/test_vfs $(BUILD_DIR)/test_posix $(BUILD_DIR)/test_posix_vfs $(BUILD_DIR)/test_nke
 	./$(BUILD_DIR)/test_subsystem
 	./$(BUILD_DIR)/test_stream
 	./$(BUILD_DIR)/test_device
