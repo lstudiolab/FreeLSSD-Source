@@ -27,15 +27,14 @@ The loader transfers control to `xiul_arch_entry` at EL1 or EL2 with
 the hand-off pointer in X0. The kernel image and bootstrap stack must
 be mapped, and asynchronous exceptions masked. The entry establishes
 an aligned bootstrap stack before calling C. XIUL then installs the VBAR
-vector table for the active exception level (EL1 or EL2). All vector classes currently enter a fail-stop handler; GIC
-routing and interrupt dispatch are not implemented.
+vector table for the active exception level (EL1 or EL2). All vector classes report their vector slot and ESR syndrome, then enter a fail-stop handler; GIC routing and interrupt dispatch are not implemented.
 
 ## Current limitations
 
 These entry stubs are not UEFI applications, BIOS boot sectors, or
 Multiboot2 loaders. A loader is still required to load the ELF image,
 establish page tables (including a mapping for `memory_map_virtual`) and construct the hand-off structure. The platform now installs an x86_64 IDT and an AArch64 EL1 vector table.
-Unhandled exceptions and interrupts are fail-stop. The current platform code
+Unhandled exceptions and interrupts are diagnostic fail-stop (x86_64 reports vector/error code; AArch64 reports vector slot/ESR). The current platform code
 does not establish a complete virtual-memory manager, interrupt controller,
 timer, or SMP environment.
 Do not treat entry-stub compilation as proof of a bootable kernel.
