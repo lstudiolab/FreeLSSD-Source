@@ -1,3 +1,8 @@
+/*
+ * Modified by L,Studio.
+ * Copyright (c) 2026 L,Studio.
+ */
+
 #include "xiul/subsystem.h"
 
 #define XIUL_NO_INDEX ((size_t)-1)
