@@ -40,6 +40,6 @@ make -C kernel/xiul test
 make -C kernel/xiul arch-build
 ```
 
-These commands validate XIUL-owned host tests and freestanding relocatable objects. They do not yet build a final boot image or compile upstream Mach, Linux drivers or FreeBSD networking/filesystems against XIUL.
+These commands validate XIUL-owned host tests and link freestanding ELF images for x86_64 and AArch64. The ELF images require an external loader that constructs `xiul_boot_info_t`; they are not standalone bootable media. The commands do not compile upstream Mach, Linux drivers or FreeBSD networking/filesystems against XIUL. See `boot/README.md` for the exact loader hand-off contract.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) and [INTEGRATION-STATUS.md](INTEGRATION-STATUS.md) for contracts, ownership rules and remaining work. Upstream source directories are not evidence of completed integration.
