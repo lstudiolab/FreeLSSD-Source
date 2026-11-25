@@ -32,7 +32,7 @@ A physical device may be owned by one Mach-native or Linux driver at a time. Lin
 | BSD VFS | Mount/open/read/write/close and vnode contracts | FreeBSD VFS/vnode/filesystem sources are not adapted or linked |
 | POSIX | Syscall dispatch and per-process file-descriptor table connected to VFS | No complete process model, user-memory boundary, signal model or ABI |
 | NKE | Priority-ordered packet hooks | No loadable module ABI or safe unload |
-| x86_64 / AArch64 | Early platform console, CPU/IRQ primitives and PCI config access | No complete architecture entry, VM bootstrap, interrupt-controller setup, SMP or final kernel image |
+| x86_64 / AArch64 | Loader hand-off entry stubs, bootstrap stacks, linker scripts, early console, CPU/IRQ primitives and PCI config access; Makefile links XIUL-owned ELF images | Loader required; no page-table/VM bootstrap, exception vectors, interrupt-controller setup, timer, SMP or QEMU boot verification |
 
 ## CI coverage
 
@@ -47,7 +47,7 @@ It does not:
 
 ## Remaining kernel milestones
 
-1. Define and implement the boot protocol, architecture entry assembly, linker scripts and final image for each target.
+1. Implement a real UEFI/BIOS/Multiboot loader for each target; current entry stubs only consume the documented XIUL hand-off ABI and are not standalone bootloaders.
 2. Establish page tables, exception vectors, interrupt controllers, timers, firmware discovery and SMP bring-up.
 3. Audit selected Mach source dependencies and connect Mach VM, scheduler, task/thread and IPC bootstrap to XIUL.
 4. Complete device resource ownership, MMIO mapping, IRQ routing, DMA and I/O stream integration.
