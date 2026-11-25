@@ -7,6 +7,13 @@ Copyright (c) 2026 L,Studio. All rights reserved.
 
 This directory is XIUL-owned glue; it does not replace the imported Mach machine-dependent implementation.
 
+## Exception handling
+
+- `x86_64`: installs a 256-entry IDT using the active code-segment selector. Every vector has a dedicated stub; vectors with architectural error codes preserve the CPU-pushed error-code slot. Unhandled vectors enter a fail-stop handler.
+- `arm64`: installs a 2 KiB-aligned 16-slot EL1 VBAR table. All vector classes currently enter a fail-stop handler. The loader must enter at EL1.
+
+These tables establish deterministic exception entry, not a functioning interrupt subsystem. GIC/APIC initialization, IRQ routing, timer interrupts, exception recovery and scheduling are not implemented.
+
 ## Supported compile targets
 
 - `x86_64`: privileged CPU/interrupt primitives and a bounded-timeout 16550 COM1 console.
