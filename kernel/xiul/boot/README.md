@@ -23,11 +23,11 @@ The entry switches to an XIUL-owned bootstrap stack before calling C.
 
 ## AArch64 entry
 
-The loader transfers control to `xiul_arch_entry` at EL1 with
+The loader transfers control to `xiul_arch_entry` at EL1 or EL2 with
 the hand-off pointer in X0. The kernel image and bootstrap stack must
 be mapped, and asynchronous exceptions masked. The entry establishes
-an aligned bootstrap stack before calling C. XIUL then installs the EL1 VBAR
-vector table. All vector classes currently enter a fail-stop handler; GIC
+an aligned bootstrap stack before calling C. XIUL then installs the VBAR
+vector table for the active exception level (EL1 or EL2). All vector classes currently enter a fail-stop handler; GIC
 routing and interrupt dispatch are not implemented.
 
 ## Current limitations
