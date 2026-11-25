@@ -6,6 +6,13 @@ OUTPUT_FORMAT(elf64-littleaarch64)
 OUTPUT_ARCH(aarch64)
 ENTRY(xiul_arch_entry)
 
+PHDRS
+{
+    text PT_LOAD FLAGS(5);
+    rodata PT_LOAD FLAGS(4);
+    data PT_LOAD FLAGS(6);
+}
+
 SECTIONS
 {
     . = 0xffff000000080000;
@@ -16,8 +23,8 @@ SECTIONS
         *(.text .text.*)
     }
 
-    .rodata ALIGN(0x1000) : { *(.rodata .rodata.*) }
-    .data ALIGN(0x1000) : { *(.data .data.*) }
+    .rodata ALIGN(0x1000) : { *(.rodata .rodata.*) } :rodata
+    .data ALIGN(0x1000) : { *(.data .data.*) } :data
     .bss ALIGN(0x1000) (NOLOAD) : {
         *(COMMON)
         *(.bss.boot)
