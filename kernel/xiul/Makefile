@@ -1,8 +1,8 @@
 # This file has been modified by L,Studio.
 # Copyright (c) 2026 L,Studio. All rights reserved.
 
-# XIUL host tests plus complete XIUL-owned freestanding core object builds.
-# This does not claim to build imported upstream Mach/Linux/FreeBSD sources.
+# XIUL host tests plus freestanding builds of XIUL-owned code.
+# Imported Mach/Linux/FreeBSD source is not yet linked into the kernel.
 CC ?= cc
 CC_ARM64 ?= aarch64-linux-gnu-gcc
 LD_ARM64 ?= aarch64-linux-gnu-ld
@@ -14,10 +14,10 @@ X86_64_CFLAGS = $(FREESTANDING_CFLAGS) -m64 -mno-red-zone -mcmodel=kernel
 ARM64_CFLAGS = $(FREESTANDING_CFLAGS) -mgeneral-regs-only
 
 XIUL_COMMON_SOURCES = \
-	core/subsystem.c core/device.c core/platform.c core/kernel.c core/memory.c core/runtime.c core/entry.c core/pci.c \
+	core/subsystem.c core/device.c core/platform.c core/kernel.c core/memory.c core/runtime.c core/entry.c core/exception.c core/pci.c \
 	io/stream.c compat/linux/pci.c \
 	bsd/net/net.c bsd/vfs/vfs.c bsd/posix/syscall.c bsd/posix/fd.c bsd/nke/nke.c
-XIUL_X86_64_SOURCES = $(XIUL_COMMON_SOURCES) platform/x86_64/platform.c platform/x86_64/pci.c
+XIUL_X86_64_SOURCES = $(XIUL_COMMON_SOURCES) platform/x86_64/platform.c platform/x86_64/pci.c platform/x86_64/exception.c
 XIUL_ARM64_SOURCES = $(XIUL_COMMON_SOURCES) platform/arm64/platform.c platform/arm64/pci.c
 X86_64_OBJECTS = $(patsubst %.c,$(BUILD_DIR)/x86_64/%.o,$(XIUL_X86_64_SOURCES))
 ARM64_OBJECTS = $(patsubst %.c,$(BUILD_DIR)/arm64/%.o,$(XIUL_ARM64_SOURCES))
@@ -94,7 +94,15 @@ $(BUILD_DIR)/x86_64/entry.o: boot/x86_64/entry.S
 	@mkdir -p $(dir $@)
 	$(CC) $(X86_64_CFLAGS) -c $< -o $@
 
+$(BUILD_DIR)/x86_64/exceptions.o: boot/x86_64/exceptions.S
+	@mkdir -p $(dir $@)
+	$(CC) $(X86_64_CFLAGS) -c $< -o $@
+
 $(BUILD_DIR)/arm64/entry.o: boot/arm64/entry.S
+	@mkdir -p $(dir $@)
+	$(CC_ARM64) $(ARM64_CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/arm64/exceptions.o: boot/arm64/exceptions.S
 	@mkdir -p $(dir $@)
 	$(CC_ARM64) $(ARM64_CFLAGS) -c $< -o $@
 
@@ -104,14 +112,14 @@ $(BUILD_DIR)/x86_64/xiul-core.o: $(X86_64_OBJECTS)
 $(BUILD_DIR)/arm64/xiul-core.o: $(ARM64_OBJECTS)
 	$(LD_ARM64) -r $^ -o $@
 
-$(BUILD_DIR)/x86_64/xiul.elf: $(BUILD_DIR)/x86_64/entry.o $(BUILD_DIR)/x86_64/xiul-core.o boot/x86_64/linker.ld
-	$(CC) -nostdlib -no-pie -Wl,--build-id=none -Wl,-T,boot/x86_64/linker.ld $(BUILD_DIR)/x86_64/entry.o $(BUILD_DIR)/x86_64/xiul-core.o -o $@
+$(BUILD_DIR)/x86_64/xiul.elf: $(BUILD_DIR)/x86_64/entry.o $(BUILD_DIR)/x86_64/exceptions.o $(BUILD_DIR)/x86_64/xiul-core.o boot/x86_64/linker.ld
+	$(CC) -nostdlib -no-pie -Wl,--build-id=none -Wl,-T,boot/x86_64/linker.ld $(BUILD_DIR)/x86_64/entry.o $(BUILD_DIR)/x86_64/exceptions.o $(BUILD_DIR)/x86_64/xiul-core.o -o $@
 
 x86_64-build: $(BUILD_DIR)/x86_64/xiul.elf
 	@echo "XIUL x86_64 ELF image link: PASS"
 
-$(BUILD_DIR)/arm64/xiul.elf: $(BUILD_DIR)/arm64/entry.o $(BUILD_DIR)/arm64/xiul-core.o boot/arm64/linker.ld
-	$(LD_ARM64) -T boot/arm64/linker.ld $(BUILD_DIR)/arm64/entry.o $(BUILD_DIR)/arm64/xiul-core.o -o $@
+$(BUILD_DIR)/arm64/xiul.elf: $(BUILD_DIR)/arm64/entry.o $(BUILD_DIR)/arm64/exceptions.o $(BUILD_DIR)/arm64/xiul-core.o boot/arm64/linker.ld
+	$(LD_ARM64) -T boot/arm64/linker.ld $(BUILD_DIR)/arm64/entry.o $(BUILD_DIR)/arm64/exceptions.o $(BUILD_DIR)/arm64/xiul-core.o -o $@
 
 arm64-build: $(BUILD_DIR)/arm64/xiul.elf
 	@echo "XIUL AArch64 ELF image link: PASS"
@@ -130,6 +138,8 @@ source-audit:
 	@test -f boot/README.md
 	@test -f boot/x86_64/linker.ld
 	@test -f boot/arm64/linker.ld
+	@test -f boot/x86_64/exceptions.S
+	@test -f boot/arm64/exceptions.S
 	@grep -q '^mach-osfmk ' UPSTREAM-SOURCES.txt
 	@grep -q '^linux ' UPSTREAM-SOURCES.txt
 	@grep -q '^freebsd ' UPSTREAM-SOURCES.txt
