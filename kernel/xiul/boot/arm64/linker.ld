@@ -21,7 +21,7 @@ SECTIONS
     .text ALIGN(0x1000) : {
         KEEP(*(.text.boot))
         *(.text .text.*)
-    }
+    } :text
 
     .rodata ALIGN(0x1000) : { *(.rodata .rodata.*) } :rodata
     .data ALIGN(0x1000) : { *(.data .data.*) } :data
@@ -29,7 +29,7 @@ SECTIONS
         *(COMMON)
         *(.bss.boot)
         *(.bss .bss.*)
-    }
+    } :data
 
     . = ALIGN(0x1000);
     __xiul_kernel_end = .;
