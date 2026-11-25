@@ -9,6 +9,7 @@
 #include <string.h>
 #include "xiul/kernel.h"
 #include "xiul/subsystem.h"
+#include "xiul/memory.h"
 
 static int sequence[8], sequence_count;
 static const xiul_memory_region_t boot_memory[] = {
