@@ -1,3 +1,5 @@
+<!-- Modified by L,Studio. Copyright (c) 2026 L,Studio. -->
+
 # XIUL Kernel Architecture
 
 ## Layer model
