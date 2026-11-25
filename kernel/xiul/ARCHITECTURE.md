@@ -5,18 +5,18 @@ Copyright (c) 2026 L,Studio. All rights reserved.
 
 # XIUL Kernel Architecture
 
-XIUL is the kernel of Stela. Its design follows the layered organization of Darwin/XNU, but XIUL is an independent integration of Mach mechanisms, BSD kernel functionality and Linux driver infrastructure.
+XIUL is the kernel of FreeLSSD. Its design follows the layered organization of Darwin/XNU, but XIUL is an independent integration of Mach mechanisms, BSD kernel functionality and Linux driver infrastructure.
 
 ## Kernel ownership model
 
 ```text
-Stela
+FreeLSSD
   +-- User space (developed by L,Studio)
-  |     +-- Stela native APIs and frameworks
+  |     +-- FreeLSSD native APIs and frameworks
   |     +-- BSD / POSIX APIs
   |     +-- Classic compatibility APIs
   |     +-- QuickTime-compatible APIs
-  |     +-- Stela GUI, services and utilities
+  |     +-- FreeLSSD GUI, services and utilities
   |
   +-- XIUL kernel
         +-- Mach foundation
@@ -54,7 +54,7 @@ This is the logical ownership model. It does not claim that upstream code is alr
 | BSD filesystems | VFS, vnode and filesystem behavior | BSD VFS subsystem |
 | POSIX | User/kernel ABI and process-facing syscall semantics | BSD-compatible syscall layer |
 | NKE | Versioned network extension hooks | XIUL/BSD network integration |
-| Stela user space | GUI, frameworks, APIs, services and utilities | Stela |
+| FreeLSSD user space | GUI, frameworks, APIs, services and utilities | FreeLSSD |
 
 ## Critical integration rules
 
@@ -63,7 +63,7 @@ This is the logical ownership model. It does not claim that upstream code is alr
 3. Linux and Mach drivers may coexist. A physical device has exactly one active owner at a time; probe, bind, handoff and removal must be serialized by the XIUL device framework.
 4. Linux driver access to hardware is mediated by explicit XIUL platform contracts for MMIO, port I/O, interrupts, DMA, PCI/USB resources, power and reset. No driver may bypass resource ownership.
 5. BSD owns networking protocols and filesystems. A Linux network driver supplies the hardware-facing network device; packets cross a defined adapter into the BSD network stack. Linux networking is not substituted for BSD networking.
-6. BSD POSIX APIs are exposed to Stela user space through XIUL syscall and process services. BSD headers alone do not implement a syscall ABI.
+6. BSD POSIX APIs are exposed to FreeLSSD user space through XIUL syscall and process services. BSD headers alone do not implement a syscall ABI.
 7. Mach-native drivers remain supported and are not required to use Linux compatibility.
 8. I/O streams are XIUL-owned interfaces connecting device producers and kernel consumers. They do not imply that Apple's I/O Kit source has been imported.
 9. Upstream source is source material, not proof of integration. Every port must have a dependency inventory, build result and runtime test.
