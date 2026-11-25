@@ -1,6 +1,5 @@
 /*
  * This file has been modified by L,Studio.
- *
  * Copyright (c) 2026 L,Studio. All rights reserved.
  */
 
@@ -14,6 +13,8 @@
 #define UART_LINE_CONTROL 3u
 #define UART_MODEM_CONTROL 4u
 #define UART_LINE_STATUS 5u
+
+extern xiul_status_t xiul_x86_64_exception_initialize(void);
 
 static inline void outb(uint16_t port, uint8_t value)
 {
@@ -42,9 +43,12 @@ static void serial_initialize(void)
 
 xiul_status_t xiul_arch_early_init(const xiul_boot_info_t *boot_info)
 {
+    xiul_status_t status;
     (void)boot_info;
     serial_initialize();
-    xiul_platform_console_write("XIUL x86_64 platform initialized\r\n");
+    status = xiul_x86_64_exception_initialize();
+    if (status != XIUL_OK) return status;
+    xiul_platform_console_write("XIUL x86_64 platform initialized; IDT active\r\n");
     platform_initialized = 1;
     return XIUL_OK;
 }
