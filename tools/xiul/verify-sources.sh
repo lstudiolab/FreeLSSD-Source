@@ -1,3 +1,4 @@
+# Modified by L,Studio. Copyright (c) 2026 L,Studio.
 #!/bin/sh
 set -eu
 
