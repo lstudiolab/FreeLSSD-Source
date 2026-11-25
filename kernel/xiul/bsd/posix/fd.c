@@ -3,6 +3,11 @@
  * Copyright (c) 2026 L,Studio.
  */
 
+/*
+ * Modified by L,Studio.
+ * Copyright (c) 2026 L,Studio.
+ */
+
 #include "xiul/posix.h"
 
 void xiul_posix_process_init(xiul_posix_process_t *process)
