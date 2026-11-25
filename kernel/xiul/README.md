@@ -5,7 +5,7 @@ Copyright (c) 2026 L,Studio. All rights reserved.
 
 # XIUL Kernel
 
-XIUL is the kernel of Stela. It uses a Mach microkernel foundation, BSD kernel functionality and Linux's driver ecosystem. Stela's GUI, user space, frameworks and API ecosystem are developed separately by L,Studio.
+XIUL is the kernel of FreeLSSD. It uses a Mach microkernel foundation, BSD kernel functionality and Linux's driver ecosystem. FreeLSSD's GUI, user space, frameworks and API ecosystem are developed separately by L,Studio.
 
 ## Architecture
 
