@@ -14,9 +14,13 @@ on:
       - ".github/workflows/xiul-source-audit.yml"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   source-audit:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -41,31 +45,10 @@ jobs:
             /kernel/xiul/linux/README
             /kernel/xiul/freebsd/README.md
           sparse-checkout-cone-mode: false
-          sparse-checkout: |
-            /.github/workflows/xiul.yml
-            /.github/workflows/xiul-source-audit.yml
-            /kernel/xiul/Makefile
-            /kernel/xiul/xiul.toml
-            /kernel/xiul/README.md
-            /kernel/xiul/ARCHITECTURE.md
-            /kernel/xiul/UPSTREAM-SOURCES.txt
-            /kernel/xiul/INTEGRATION-STATUS.md
-            /kernel/xiul/boot/**
-            /kernel/xiul/core/**
-            /kernel/xiul/include/**
-            /kernel/xiul/io/**
-            /kernel/xiul/compat/**
-            /kernel/xiul/bsd/**
-            /kernel/xiul/platform/**
-            /kernel/xiul/tests/**
-            /kernel/xiul/mach/README.md
-            /kernel/xiul/linux/README
-            /kernel/xiul/freebsd/README.md
-          sparse-checkout-cone-mode: false
       - name: Install AArch64 cross compiler
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu
+          sudo apt-get install --yes gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
       - name: Run XIUL source audit
         run: make -C kernel/xiul source-audit
       - name: Build and test XIUL core
