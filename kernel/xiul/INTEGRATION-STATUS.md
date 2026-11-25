@@ -17,7 +17,7 @@ This status distinguishes imported source, XIUL-owned tested code and upstream i
 - XIUL owns device arbitration, I/O streams and integration contracts.
 - FreeLSSD owns user space, GUI, frameworks, APIs, services and utilities.
 
-A physical device may be owned by one Mach-native or Linux driver at a time. Linux network devices connect to the BSD network stack through an explicit packet adapter.
+The version-2 boot hand-off provides both physical and mapped virtual addresses for the XIUL memory map. XIUL initializes a tested, fixed-capacity bootstrap physical-page allocator from conventional-memory regions before PCI enumeration. It is not a Mach pmap or a general virtual-memory manager.\n\nA physical device may be owned by one Mach-native or Linux driver at a time. Linux network devices connect to the BSD network stack through an explicit packet adapter.
 
 ## Verified implementation
 
