@@ -10,7 +10,7 @@ XIUL is the kernel of FreeLSSD. It uses a Mach microkernel foundation, BSD kerne
 ## Architecture
 
 - **Mach:** microkernel foundation, tasks, threads, scheduling, IPC, VM primitives, I/O streams and Mach-native drivers.
-- **Linux:** existing Linux driver source and the Linux kernel APIs required to execute those drivers. Linux is used for hardware compatibility, not as Stela's user-space environment or networking/filesystem stack.
+- **Linux:** existing Linux driver source and the Linux kernel APIs required to execute those drivers. Linux is used for hardware compatibility, not as FreeLSSD's user-space environment or networking/filesystem stack.
 - **BSD:** networking, sockets, routing, VFS, filesystems, POSIX syscall semantics and Unix kernel functionality.
 - **XIUL:** boot hand-off validation, bootstrap physical-page allocation, device ownership, I/O coordination and integration contracts between the three.
 - **Stela:** user space, GUI, native frameworks, BSD/Classic/QuickTime-compatible APIs, services and system utilities.
