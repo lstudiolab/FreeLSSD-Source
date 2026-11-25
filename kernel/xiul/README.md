@@ -1,3 +1,5 @@
+<!-- Modified by L,Studio. Copyright (c) 2026 L,Studio. -->
+
 # XIUL Kernel
 
 XIUL is FreeLSSD's hybrid kernel architecture. It follows the Mach/BSD structure of XNU while using selected Linux driver code for broader hardware support. XIUL is its own kernel integration project; it is not a renamed copy of XNU, Linux or FreeBSD.
