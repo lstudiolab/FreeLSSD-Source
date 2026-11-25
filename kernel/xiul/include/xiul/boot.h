@@ -10,7 +10,7 @@
 #include <stdint.h>
 
 #define XIUL_BOOT_INFO_MAGIC UINT64_C(0x5849554c424f4f54)
-#define XIUL_BOOT_INFO_VERSION 1u
+#define XIUL_BOOT_INFO_VERSION 2u
 
 /*
  * Bootloader hand-off contract shared by the x86_64 and AArch64 entry paths.
@@ -28,6 +28,7 @@ typedef struct {
     uint32_t version;
     uint32_t structure_size;
     uint64_t memory_map_physical;
+    uint64_t memory_map_virtual;
     uint64_t memory_map_entries;
     uint64_t uart_virtual;
     uint32_t uart_clock_hz;
