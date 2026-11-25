@@ -36,7 +36,7 @@ A physical device may be owned by one Mach-native or Linux driver at a time. Lin
 | BSD VFS | Mount/open/read/write/close and vnode contracts | FreeBSD VFS/vnode/filesystem sources are not adapted or linked |
 | POSIX | Syscall dispatch and per-process file-descriptor table connected to VFS | No complete process model, user-memory boundary, signal model or ABI |
 | NKE | Priority-ordered packet hooks | No loadable module ABI or safe unload |
-| x86_64 / AArch64 | Loader hand-off entry stubs, bootstrap stacks, linker scripts, early console, CPU/IRQ primitives, x86_64 256-entry IDT, AArch64 EL1 VBAR vectors and PCI config access; Makefile links XIUL-owned ELF images | Loader required; vectors are fail-stop only; no page-table/VM bootstrap, APIC/GIC routing, timer, SMP or QEMU boot verification |
+| x86_64 / AArch64 | Loader hand-off entry stubs, bootstrap stacks, linker scripts, early console, CPU/IRQ primitives, x86_64 256-entry IDT with vector/error diagnostics, AArch64 VBAR vectors at EL1 or EL2 with vector-slot/ESR diagnostics and PCI config access; Makefile links XIUL-owned ELF images | Loader required; exception handlers remain diagnostic fail-stop; no page-table/VM bootstrap, APIC/GIC routing, timer, SMP or QEMU boot verification |
 
 ## CI coverage
 
