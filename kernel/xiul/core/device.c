@@ -1,3 +1,8 @@
+/*
+ * Modified by L,Studio.
+ * Copyright (c) 2026 L,Studio.
+ */
+
 #include "xiul/device.h"
 
 static xiul_device_t *devices[XIUL_DEVICE_MAX];
