@@ -26,7 +26,7 @@ A physical device may be owned by one Mach-native or Linux driver at a time. Lin
 | Subsystem lifecycle | Dependency validation, cycle detection, phase-aware startup, reverse shutdown and failure rollback | Not connected to Mach bootstrap |
 | I/O streams | Bounded single-producer/single-consumer byte stream with partial nonblocking I/O and close semantics | Not yet connected to Mach IPC or real device drivers |
 | Device framework | Fixed-capacity device/driver registry, bus and ID matching, probe/bind and remove/unbind | No production hotplug serialization or full resource ownership |
-| PCI | Generic enumeration, BAR sizing and x86_64 CF8/CFC / AArch64 ECAM configuration backends | Platform MMIO mapping, IRQ routing and DMA are incomplete |
+| Physical memory | EFI conventional-memory map ingestion, page alignment, extent coalescing, contiguous page allocation/release and accounting | Bootstrap allocator only; no page tables, pmap, virtual allocator, DMA zones or SMP-safe locking |\n| PCI | Generic enumeration, BAR sizing and x86_64 CF8/CFC / AArch64 ECAM configuration backends | Platform MMIO mapping, IRQ routing and DMA are incomplete |
 | Linux driver bridge | Narrow Linux-style PCI registration adapter | No general Linux kernel API environment; no upstream Linux driver has been built or run |
 | BSD networking | Network-interface and protocol-handler dispatch boundary | FreeBSD mbuf, sockets, routing and protocol stack are not adapted or linked |
 | BSD VFS | Mount/open/read/write/close and vnode contracts | FreeBSD VFS/vnode/filesystem sources are not adapted or linked |
@@ -36,7 +36,7 @@ A physical device may be owned by one Mach-native or Linux driver at a time. Lin
 
 ## CI coverage
 
-The XIUL GitHub Actions workflow runs source-layout audits and host-side tests, then compiles and links XIUL-owned freestanding ELF images for x86_64 and AArch64 and publishes them as workflow artifacts. This validates the current XIUL-owned build only; it does not validate imported upstream kernel integration or bootability.
+The XIUL GitHub Actions workflow runs source-layout audits and host-side tests, then compiles and links XIUL-owned freestanding ELF images for x86_64 and AArch64 and publishes them as workflow artifacts. Host tests now include the bootstrap physical-page allocator and kernel startup requires a mapped boot memory map (ABI version 2). This validates the current XIUL-owned build only; it does not validate imported upstream kernel integration or bootability.
 
 It does not:
 - build a final bootable kernel image;
@@ -48,7 +48,7 @@ It does not:
 ## Remaining kernel milestones
 
 1. Implement a real UEFI/BIOS/Multiboot loader for each target; current entry stubs only consume the documented XIUL hand-off ABI and are not standalone bootloaders.
-2. Establish page tables, exception vectors, interrupt controllers, timers, firmware discovery and SMP bring-up.
+2. Establish page tables and a virtual-memory/pmap layer on top of the bootstrap physical allocator, then add exception vectors, interrupt controllers, timers, firmware discovery and SMP bring-up.
 3. Audit selected Mach source dependencies and connect Mach VM, scheduler, task/thread and IPC bootstrap to XIUL.
 4. Complete device resource ownership, MMIO mapping, IRQ routing, DMA and I/O stream integration.
 5. Implement Linux driver compatibility APIs in dependency-driven layers and build/run an initial real PCI driver.
