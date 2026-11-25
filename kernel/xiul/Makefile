@@ -73,6 +73,7 @@ test: $(BUILD_DIR)/test_subsystem $(BUILD_DIR)/test_stream $(BUILD_DIR)/test_dev
 	./$(BUILD_DIR)/test_device
 	./$(BUILD_DIR)/test_platform
 	./$(BUILD_DIR)/test_kernel
+	./$(BUILD_DIR)/test_memory
 	./$(BUILD_DIR)/test_pci
 	./$(BUILD_DIR)/test_linux_pci
 	./$(BUILD_DIR)/test_net
