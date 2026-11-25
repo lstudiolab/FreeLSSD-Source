@@ -17,7 +17,7 @@ static xiul_status_t init_ok(xiul_kernel_context_t *context)
 static xiul_status_t init_platform(xiul_kernel_context_t *context)
 { (void)context; sequence[sequence_count++] = 2; return XIUL_OK; }
 static xiul_status_t init_driver(xiul_kernel_context_t *context)
-{ (void)context; sequence[sequence_count++] = 3; return fail_driver ? XIUL_E_INIT : XIUL_OK; }
+{ (void)context; sequence[sequence_count++] = 3; return fail_driver ? XIUL_E_NOMEM : XIUL_OK; }
 static void stop_record(xiul_kernel_context_t *context)
 { (void)context; sequence[sequence_count++] = -1; }
 
@@ -97,7 +97,7 @@ static void test_startup_rollback(void)
     assert(xiul_subsystem_register(&mach) == XIUL_OK);
     assert(xiul_subsystem_register(&platform) == XIUL_OK);
     assert(xiul_subsystem_register(&driver) == XIUL_OK);
-    assert(xiul_subsystem_start_all(0) == XIUL_E_INIT);
+    assert(xiul_subsystem_start_all(0) == XIUL_E_NOMEM);
     assert(sequence_count == 5);
     assert(sequence[0] == 1 && sequence[1] == 2 && sequence[2] == 3);
     assert(sequence[3] == -1 && sequence[4] == -1);
