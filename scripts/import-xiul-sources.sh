@@ -1,4 +1,4 @@
-# Modified by L,Studio. Copyright (c) 2026 L,Studio.
+undefined# Modified by L,Studio. Copyright (c) 2026 L,Studio.
 #!/usr/bin/env bash
 set -euo pipefail
 
