@@ -1,3 +1,5 @@
+<!-- Modified by L,Studio. Copyright (c) 2026 L,Studio. -->
+
 # FreeLSSD
 
 FreeLSSD is the operating-system project. Its kernel is **XIUL**.
