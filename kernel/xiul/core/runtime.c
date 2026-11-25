@@ -6,6 +6,7 @@
  */
 
 #include <stddef.h>
+#include <stdint.h>
 
 void *memset(void *destination, int value, size_t length)
 {
