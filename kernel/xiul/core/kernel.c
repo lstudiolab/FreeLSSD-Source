@@ -64,6 +64,9 @@ xiul_status_t xiul_kernel_boot(const xiul_boot_info_t *boot_info)
 {
     xiul_status_t status;
     if (boot_info == 0 || kernel_started ||
+        boot_info->magic != XIUL_BOOT_INFO_MAGIC ||
+        boot_info->version != XIUL_BOOT_INFO_VERSION ||
+        boot_info->structure_size < sizeof(*boot_info) ||
         boot_info->memory_map_entries == 0 ||
         boot_info->memory_map_virtual == 0) return XIUL_E_INVALID;
     kernel_context.boot_info = *boot_info;
