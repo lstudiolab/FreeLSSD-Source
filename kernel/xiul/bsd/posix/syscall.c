@@ -3,6 +3,11 @@
  * Copyright (c) 2026 L,Studio.
  */
 
+/*
+ * Modified by L,Studio.
+ * Copyright (c) 2026 L,Studio.
+ */
+
 #include "xiul/posix.h"
 
 static xiul_posix_syscall_fn syscall_table[XIUL_POSIX_SYSCALL_MAX];
