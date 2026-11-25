@@ -1555,8 +1555,12 @@ xiul_x86_64_isr_common:
     pushq %r13
     pushq %r14
     pushq %r15
+
+    /* Normalized frame: vector at +120, CPU error code at +128. */
+    movq 120(%rsp), %rdi
+    movq 128(%rsp), %rsi
     andq $-16, %rsp
-    call xiul_exception_fatal
+    call xiul_exception_dispatch
 1:
     cli
     hlt
