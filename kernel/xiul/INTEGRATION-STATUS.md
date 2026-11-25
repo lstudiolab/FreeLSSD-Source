@@ -36,7 +36,7 @@ A physical device may be owned by one Mach-native or Linux driver at a time. Lin
 
 ## CI coverage
 
-The existing workflow runs source-layout audits, host-side tests and freestanding compilation/relocatable linking of XIUL-owned C objects for x86_64 and AArch64.
+The XIUL GitHub Actions workflow runs source-layout audits and host-side tests, then compiles and links XIUL-owned freestanding ELF images for x86_64 and AArch64 and publishes them as workflow artifacts. This validates the current XIUL-owned build only; it does not validate imported upstream kernel integration or bootability.
 
 It does not:
 - build a final bootable kernel image;
