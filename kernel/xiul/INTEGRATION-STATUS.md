@@ -5,43 +5,57 @@ Copyright (c) 2026 L,Studio. All rights reserved.
 
 # XIUL Integration Status
 
-Last updated: 2026-11-24
+Last updated: 2026-11-25
 
-This document separates imported source, XIUL-owned tested code and actual upstream integration. A directory containing upstream code does not mean that code has been ported or linked.
+This status distinguishes imported source, XIUL-owned tested code and upstream integration. An imported source directory is not proof that the code has been adapted, linked or executed.
 
-| Area | Imported source | XIUL-owned code | Upstream integration/build |
-|---|---|---|---|
-| Mach | XNU `osfmk/` subtree only | Shared boot coordinator invokes platform/PCI initialization | Mach task/thread, IPC, VM and scheduler not yet integrated |
-| Linux drivers | Full Linux source tree | Device registry, generic PCI enumeration/BAR sizing, x86_64 CF8/CFC and ARM64 ECAM config backends, Linux PCI driver bridge and decode/bus-master controls | No upstream Linux driver compiled against XIUL yet; platform MMIO mapping, IRQ routing and DMA remain missing |
-| FreeBSD networking | Full FreeBSD source tree | Network-interface and protocol-handler dispatch boundary | FreeBSD mbuf, socket, routing and protocol stack not yet adapted or linked |
-| FreeBSD VFS/filesystems | Full FreeBSD source tree | Mount/open/read/write/close VFS and vnode contract | FreeBSD VFS/vnode/filesystem sources not yet adapted or linked |
-| POSIX | Available in imported source pools | Syscall dispatch plus per-process FD table connected to VFS | No complete process model, syscall ABI or user-memory boundary |
-| NKE | Not an upstream kernel dependency | Priority-ordered packet hooks | No loadable module ABI or safe unload |
-| x86_64 | Mach and FreeBSD architecture source available | Early CPU/IRQ/COM1 platform objects | No complete boot image |
-| ARM64 | Mach and FreeBSD architecture source available | Early CPU/IRQ/PL011 platform objects | No complete boot image |
+## Architecture baseline
 
-## Verified CI coverage
+- Mach is the microkernel foundation and supports Mach-native drivers.
+- Linux driver source remains in the Linux tree. The XIUL Linux driver environment must preserve the Linux driver model and implement the kernel APIs required by each selected driver.
+- BSD provides networking, filesystems, POSIX syscall semantics and Unix kernel functionality.
+- XIUL owns device arbitration, I/O streams and integration contracts.
+- Stela owns user space, GUI, frameworks, APIs, services and utilities.
 
-The XIUL workflow currently runs:
-- source-layout and upstream-manifest audit;
-- host tests for kernel boot orchestration, subsystem lifecycle, I/O stream, device/driver registry, boot-info validation, synthetic PCI enumeration/BAR sizing/driver binding, Linux PCI bridge, network interfaces, VFS mount/file lifecycle, POSIX syscall dispatch and POSIX-FD-to-VFS integration, and NKE hooks;
-- freestanding compilation and relocatable linking of all XIUL-owned core, device, PCI, Linux-PCI bridge, network/VFS/POSIX/NKE adapter, I/O-stream and architecture platform C objects for both x86_64 and AArch64.
+A physical device may be owned by one Mach-native or Linux driver at a time. Linux network devices connect to the BSD network stack through an explicit packet adapter.
 
-It does not run:
-- a final bootable kernel image link or bootloader handoff (the output is a relocatable XIUL-owned core object bundle, not a boot image);
-- a build of imported Mach `osfmk/`;
-- a build of upstream Linux drivers against XIUL;
-- a build of FreeBSD networking or VFS components against XIUL;
-- a kernel linker stage, bootloader handoff, QEMU boot, or physical-hardware test.
+## Verified implementation
 
-## Required milestones
+| Area | XIUL-owned implementation | Upstream integration / runtime status |
+|---|---|---|
+| Subsystem lifecycle | Dependency validation, cycle detection, phase-aware startup, reverse shutdown and failure rollback | Not connected to Mach bootstrap |
+| I/O streams | Bounded single-producer/single-consumer byte stream with partial nonblocking I/O and close semantics | Not yet connected to Mach IPC or real device drivers |
+| Device framework | Fixed-capacity device/driver registry, bus and ID matching, probe/bind and remove/unbind | No production hotplug serialization or full resource ownership |
+| PCI | Generic enumeration, BAR sizing and x86_64 CF8/CFC / AArch64 ECAM configuration backends | Platform MMIO mapping, IRQ routing and DMA are incomplete |
+| Linux driver bridge | Narrow Linux-style PCI registration adapter | No general Linux kernel API environment; no upstream Linux driver has been built or run |
+| BSD networking | Network-interface and protocol-handler dispatch boundary | FreeBSD mbuf, sockets, routing and protocol stack are not adapted or linked |
+| BSD VFS | Mount/open/read/write/close and vnode contracts | FreeBSD VFS/vnode/filesystem sources are not adapted or linked |
+| POSIX | Syscall dispatch and per-process file-descriptor table connected to VFS | No complete process model, user-memory boundary, signal model or ABI |
+| NKE | Priority-ordered packet hooks | No loadable module ABI or safe unload |
+| x86_64 / AArch64 | Early platform console, CPU/IRQ primitives and PCI config access | No complete architecture entry, VM bootstrap, interrupt-controller setup, SMP or final kernel image |
 
-1. Mach dependency audit and standalone build integration.
-2. x86_64 and AArch64 boot entry, linker scripts, page tables, exception/interrupt controllers, timers and SMP.
-3. Connect the kernel boot coordinator to the Mach task/thread, IPC, scheduler and VM bootstrap.
-4. Linux PCI/USB, DMA, IRQ, memory, locking, timers and workqueue compatibility; port and test an initial real driver.
-5. FreeBSD mbuf/network interface/protocol and socket adapters; port and test a real protocol path.
-6. FreeBSD VFS/vnode/buffer/page-cache adapters; port and test an initial filesystem.
-7. POSIX process, file descriptor, signal and syscall implementations.
-8. NKE module ABI, lifetime tracking, synchronization and unload safety.
-9. QEMU boot tests for both architectures, followed by hardware validation.
+## CI coverage
+
+The existing workflow runs source-layout audits, host-side tests and freestanding compilation/relocatable linking of XIUL-owned C objects for x86_64 and AArch64.
+
+It does not:
+- build a final bootable kernel image;
+- compile the imported Mach `osfmk/` runtime;
+- compile upstream Linux drivers against a complete XIUL Linux compatibility environment;
+- compile FreeBSD networking or filesystem code against XIUL;
+- execute QEMU boot tests or physical-hardware tests.
+
+## Remaining kernel milestones
+
+1. Define and implement the boot protocol, architecture entry assembly, linker scripts and final image for each target.
+2. Establish page tables, exception vectors, interrupt controllers, timers, firmware discovery and SMP bring-up.
+3. Audit selected Mach source dependencies and connect Mach VM, scheduler, task/thread and IPC bootstrap to XIUL.
+4. Complete device resource ownership, MMIO mapping, IRQ routing, DMA and I/O stream integration.
+5. Implement Linux driver compatibility APIs in dependency-driven layers and build/run an initial real PCI driver.
+6. Connect Linux network drivers to BSD packet buffers and adapt a real BSD networking path.
+7. Adapt FreeBSD VFS/vnode/buffer/page-cache contracts and integrate an initial filesystem.
+8. Complete process creation, user-memory validation, POSIX syscall ABI, file descriptors and signals.
+9. Implement NKE ABI versioning, lifetime tracking, synchronization and safe unload.
+10. Add QEMU boot, device, networking, filesystem and ABI tests for x86_64 and AArch64, followed by physical hardware validation.
+
+XIUL remains integration-in-progress. It must not be described as complete or bootable until these milestones are implemented and verified.

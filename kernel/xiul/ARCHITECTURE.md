@@ -5,104 +5,94 @@ Copyright (c) 2026 L,Studio. All rights reserved.
 
 # XIUL Kernel Architecture
 
-## Layer model
+XIUL is the kernel of Stela. Its design follows the layered organization of Darwin/XNU, but XIUL is an independent integration of Mach mechanisms, BSD kernel functionality and Linux driver infrastructure.
 
-XIUL adopts the broad Mach/BSD separation used by XNU, but it is an independently integrated kernel with a Linux driver compatibility environment.
+## Kernel ownership model
 
 ```text
-FreeLSSD Core OS (Engine)
-  +-- System Utilities
-  +-- XIUL Kernel
-        +-- BSD service layer
-        |     +-- Networking
-        |     +-- Filesystem / VFS
-        |     +-- POSIX-facing interfaces
-        |     +-- NKE (network extension ABI)
-        +-- Linux driver compatibility
-        |     +-- Selected Linux drivers
-        |     +-- Linux API-to-XIUL adapters
-        +-- Mach microkernel foundation
-              +-- Tasks, threads and scheduling
-              +-- IPC
-              +-- VM primitives
-              +-- I/O streams
-              +-- XIUL device/driver framework
+Stela
+  +-- User space (developed by L,Studio)
+  |     +-- Stela native APIs and frameworks
+  |     +-- BSD / POSIX APIs
+  |     +-- Classic compatibility APIs
+  |     +-- QuickTime-compatible APIs
+  |     +-- Stela GUI, services and utilities
+  |
+  +-- XIUL kernel
+        +-- Mach foundation
+        |     +-- Tasks, threads and scheduling
+        |     +-- IPC and synchronization primitives
+        |     +-- Virtual-memory mechanisms
+        |     +-- I/O streams and device coordination
+        |     +-- Mach-native drivers
+        |
+        +-- Linux driver environment
+        |     +-- Linux driver model and required kernel APIs
+        |     +-- Linux PCI / USB / bus drivers
+        |     +-- Linux storage, network, graphics and input drivers
+        |     +-- XIUL adapters for memory, DMA, IRQ, locks,
+        |         timers, workqueues and device lifecycle
+        |
+        +-- BSD kernel functionality
+              +-- Networking protocols and sockets
+              +-- VFS and filesystem implementations
+              +-- POSIX syscall and process-facing kernel support
+              +-- NKE network extension hooks
   +-- Hardware
 ```
 
-The diagram describes intended ownership and dependency direction, not completed functionality.
+This is the logical ownership model. It does not claim that upstream code is already linked, bootable or fully adapted.
 
-## Component map
+## Responsibilities
 
-| Component | Source | XIUL responsibility |
+| Component | Responsibility | Resource owner |
 |---|---|---|
-| Mach | Selected XNU `osfmk/` source in `mach/` | Microkernel mechanisms and primitives |
-| Linux drivers | Selected files from `linux/` | Hardware support only, through `compat/linux/` |
-| BSD networking | Selected files from `freebsd/` | Network protocols and services, through `bsd/net/` |
-| BSD filesystems | Selected files from `freebsd/` | Filesystem implementations, through `bsd/vfs/` |
-| POSIX | XIUL-owned implementation | Syscall ABI and user-space contract |
-| NKE | XIUL-owned implementation | Versioned network extension registration and lifecycle |
-| I/O streams | XIUL-owned implementation | Common data path between devices, drivers and consumers |
-| Core OS | FreeLSSD user space | System utilities and user-space services |
+| Mach | Microkernel mechanisms, IPC, scheduling, VM primitives, I/O streams | XIUL core |
+| Mach-native drivers | Drivers written specifically for XIUL | XIUL device framework |
+| Linux driver environment | Preserve Linux driver source and the Linux APIs those drivers require | Linux compatibility environment, coordinated by XIUL |
+| BSD networking | Protocols, sockets, routing and network services | BSD networking subsystem |
+| BSD filesystems | VFS, vnode and filesystem behavior | BSD VFS subsystem |
+| POSIX | User/kernel ABI and process-facing syscall semantics | BSD-compatible syscall layer |
+| NKE | Versioned network extension hooks | XIUL/BSD network integration |
+| Stela user space | GUI, frameworks, APIs, services and utilities | Stela |
 
-## Ownership constraints
+## Critical integration rules
 
-- Mach-derived code initially owns CPU scheduling, task/thread primitives, IPC and virtual-memory mechanisms.
-- XIUL's platform layer owns boot, CPU bring-up, interrupt routing, clocks, physical device discovery and DMA policy.
-- The XIUL device framework owns device lifecycle. Linux drivers must not introduce a competing device manager.
-- BSD network code owns protocol behavior after it has been adapted to XIUL's packet/buffer and synchronization contracts.
-- BSD filesystem code plugs into the XIUL VFS contract; it does not replace Mach VM or device ownership.
-- POSIX compatibility is implemented at the syscall boundary.
-- NKE extensions attach to the BSD networking path through a controlled, versioned interface.
-- I/O streams are XIUL-owned abstractions. They are not a claim that XNU I/O Kit has been imported.
+1. Mach is the microkernel foundation. XIUL must not create competing global owners for CPU scheduling, address-space management, IPC or physical memory.
+2. Linux driver source stays in the Linux source tree. Drivers are not copied into a new XIUL driver implementation. The compatibility environment must supply the Linux kernel interfaces required by each selected driver.
+3. Linux and Mach drivers may coexist. A physical device has exactly one active owner at a time; probe, bind, handoff and removal must be serialized by the XIUL device framework.
+4. Linux driver access to hardware is mediated by explicit XIUL platform contracts for MMIO, port I/O, interrupts, DMA, PCI/USB resources, power and reset. No driver may bypass resource ownership.
+5. BSD owns networking protocols and filesystems. A Linux network driver supplies the hardware-facing network device; packets cross a defined adapter into the BSD network stack. Linux networking is not substituted for BSD networking.
+6. BSD POSIX APIs are exposed to Stela user space through XIUL syscall and process services. BSD headers alone do not implement a syscall ABI.
+7. Mach-native drivers remain supported and are not required to use Linux compatibility.
+8. I/O streams are XIUL-owned interfaces connecting device producers and kernel consumers. They do not imply that Apple's I/O Kit source has been imported.
+9. Upstream source is source material, not proof of integration. Every port must have a dependency inventory, build result and runtime test.
+10. Preserve upstream copyright and license notices. Review per-file licensing before linking or distributing Mach-, Linux- or FreeBSD-derived code.
 
 ## Required integration contracts
 
-The compatibility work must define and test these boundaries before upstream components are linked:
-
-1. Machine/platform: boot, CPU topology, interrupts, timers, DMA and power events.
-2. Mach adaptation: allocator/VM, locks, atomics, scheduler hooks, IPC and platform dependencies.
-3. Device and I/O: device registration, driver probe/remove, resource ownership, I/O streams and error propagation.
-4. Linux driver shim: Linux device model, bus, PCI/USB as applicable, DMA mapping, IRQ, timers, workqueues, memory allocation and power management.
-5. BSD network: mbufs or an equivalent adapted packet-buffer contract, network interfaces, sockets, routing, protocol lifecycle and synchronization.
-6. BSD VFS: vnode/inode mapping, mount lifecycle, file handles, buffers, page cache interaction and error semantics.
-7. POSIX: syscall numbers, argument validation, process/thread semantics, file descriptors, signals and conformance tests.
-8. NKE: ABI versioning, registration, ordering, unload safety, ownership and network-path hooks.
+- Boot and platform: boot protocol, CPU mode, firmware tables, memory map, early console and CPU topology.
+- Mach: machine-dependent startup, pmap/VM, scheduler, IPC, locks, atomics and timers.
+- Device/I/O: device identity, ownership, probe/remove, resource allocation, streams and error propagation.
+- Linux drivers: Linux device model, bus APIs, memory allocation, MMIO, DMA, IRQ, synchronization, timers, workqueues and power management.
+- BSD networking: packet buffers, interfaces, protocol lifecycle, sockets, routing and synchronization.
+- BSD VFS: vnode, mount, file handles, buffers, page-cache and block-device contracts.
+- POSIX: process/thread model, syscall ABI, user-memory validation, file descriptors, signals and conformance.
+- NKE: ABI versioning, registration, hook ordering, reference/lifetime tracking and safe unload.
 
 ## Build order
 
-1. Audit the selected Mach tree for dependencies outside `osfmk/`; adapt only required dependencies.
-2. Select one initial architecture and implement XIUL platform startup.
-3. Establish a minimal Mach-derived kernel build and boot test.
-4. Implement XIUL device and I/O stream contracts.
-5. Port a small, well-supported Linux driver subset through the compatibility layer.
-6. Port BSD networking components behind the XIUL network contracts.
-7. Port BSD filesystems behind the XIUL VFS contracts.
-8. Implement POSIX syscall coverage and NKE lifecycle.
-9. Add automated build, boot, device, networking, filesystem and ABI tests.
+1. Establish a real boot protocol and architecture entry for each supported target.
+2. Bring up page tables, exception/interrupt handling, timers and early console.
+3. Integrate the selected Mach source with XIUL platform and VM contracts.
+4. Start Mach task/thread, scheduler and IPC services from the XIUL boot path.
+5. Complete the XIUL device ownership and I/O stream layer.
+6. Implement Linux driver compatibility primitives and port one real driver per bus class.
+7. Connect Linux network drivers to BSD networking.
+8. Adapt BSD networking and VFS/filesystem implementations.
+9. Complete POSIX process/syscall behavior and NKE lifecycle.
+10. Run QEMU boot, device, networking, filesystem and ABI tests on x86_64 and AArch64, then validate physical hardware.
 
-## Source and licensing policy
+## Current implementation status
 
-The complete XNU source tree is not part of XIUL. Only selected Mach `osfmk/` files are imported. Do not pull in XNU BSD, I/O Kit, libkern, libsa, libsyscall or unrelated platform/build code to resolve a dependency without first documenting and reviewing that dependency.
-
-Linux-derived files generally carry GPL-2.0 terms; FreeBSD and Mach files have their own license and notice requirements. Preserve all notices and review file-level licenses before combining, linking or distributing components.
-
-## Implementation status
-
-Implemented in XIUL-owned code and covered by host-side CI tests:
-
-- fixed-capacity subsystem registry with dependency validation, cycle detection, phase-aware startup, reverse shutdown and failure rollback;
-- bounded single-producer/single-consumer I/O byte stream with nonblocking partial reads/writes and close semantics;
-- fixed-capacity device/driver registry with platform, PCI, USB and VirtIO ID matching, probe/bind and remove/unbind lifecycle;
-- shared status codes, public integration headers, source manifest, source-layout audit and CI test workflow.
-
-Not yet integrated or verified:
-
-- a bootable Mach-derived kernel image and platform entry path;
-- complete Mach dependency adaptation and a real Mach build for a selected architecture;
-- Linux kernel API shims for memory, DMA, IRQ, timers, workqueues, locking, PCI/USB and power management, plus actual Linux driver ports;
-- FreeBSD networking and filesystem code adapted and linked against XIUL packet/VFS interfaces;
-- implemented POSIX syscall/process ABI and NKE load/packet lifecycle;
-- end-to-end boot, hardware, networking, filesystem and ABI tests.
-
-The source trees are source material, not proof of integration. XIUL is still an integration-in-progress and must not be called a working or bootable kernel until these items are complete.
+See [INTEGRATION-STATUS.md](INTEGRATION-STATUS.md). A host test or relocatable object build does not establish that XIUL is a bootable kernel. Do not call XIUL complete until the architecture entry, Mach runtime, Linux driver environment, BSD subsystems and end-to-end boot tests work together.
