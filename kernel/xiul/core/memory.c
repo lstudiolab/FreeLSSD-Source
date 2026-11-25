@@ -122,12 +122,8 @@ xiul_status_t xiul_memory_release_pages(uint64_t physical_address, size_t page_c
          extents[position - 1].base + extents[position - 1].length > physical_address) ||
         (position < extent_count && end > extents[position].base))
         return XIUL_E_INVALID;
-    if (free_pages > total_pages - (uint64_t)page_count) return XIUL_E_INVALID;
-    if (extent_count == XIUL_MEMORY_MAX_EXTENTS &&
-        !(position != 0 &&
-          extents[position - 1].base + extents[position - 1].length == physical_address) &&
-        !(position < extent_count && end == extents[position].base))
-        return XIUL_E_CAPACITY;
+    if ((uint64_t)page_count > total_pages - free_pages) return XIUL_E_INVALID;
+    if (extent_count == XIUL_MEMORY_MAX_EXTENTS) return XIUL_E_CAPACITY;
 
     extent.base = physical_address;
     extent.length = bytes;
