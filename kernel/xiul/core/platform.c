@@ -1,3 +1,8 @@
+/*
+ * Modified by L,Studio.
+ * Copyright (c) 2026 L,Studio.
+ */
+
 #include "xiul/platform.h"
 
 #define XIUL_BOOT_INFO_MIN_SIZE ((uint32_t)sizeof(xiul_boot_info_t))
