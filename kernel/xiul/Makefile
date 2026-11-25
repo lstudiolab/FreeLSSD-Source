@@ -1,3 +1,4 @@
+# Modified by L,Studio. Copyright (c) 2026 L,Studio.
 # XIUL host tests plus complete XIUL-owned freestanding core object builds.
 # This does not claim to build imported upstream Mach/Linux/FreeBSD sources.
 CC ?= cc
