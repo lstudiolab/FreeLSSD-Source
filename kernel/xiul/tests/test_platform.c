@@ -48,14 +48,19 @@ int main(void)
     info.memory_map_virtual = 0xffff800000001000ULL;
     assert(xiul_platform_initialize(&info) == XIUL_E_INVALID);
     assert(arch_calls == 0);
+    info.memory_map_entries = 1;
+    info.memory_map_physical = 0x1000;
+    info.memory_map_virtual = 0xffff800000001000ULL;
+    assert(xiul_platform_initialize(&info) == XIUL_OK);
+    assert(arch_calls == 1);
     info.memory_map_entries = 0;
     info.memory_map_physical = 0;
     info.memory_map_virtual = 0;
     assert(xiul_platform_initialize(&info) == XIUL_OK);
-    assert(arch_calls == 1);
+    assert(arch_calls == 2);
     arch_result = XIUL_E_INIT;
     assert(xiul_platform_initialize(&info) == XIUL_E_INIT);
-    assert(arch_calls == 2);
+    assert(arch_calls == 3);
     puts("XIUL boot handoff validation tests: PASS");
     return 0;
 }
