@@ -15,7 +15,9 @@ xiul_status_t xiul_platform_initialize(const xiul_boot_info_t *boot_info)
         boot_info->version != XIUL_BOOT_INFO_VERSION ||
         boot_info->structure_size < XIUL_BOOT_INFO_MIN_SIZE ||
         (boot_info->memory_map_entries != 0 &&
-         boot_info->memory_map_physical == 0) ||
+         (boot_info->memory_map_physical == 0 ||
+          boot_info->memory_map_virtual == 0 ||
+          boot_info->memory_map_entries > (uint64_t)SIZE_MAX)) ||
         boot_info->memory_map_entries >
             UINT64_MAX / sizeof(xiul_memory_region_t)) {
         return XIUL_E_INVALID;
