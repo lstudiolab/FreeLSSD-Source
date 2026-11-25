@@ -17,7 +17,9 @@ This status distinguishes imported source, XIUL-owned tested code and upstream i
 - XIUL owns device arbitration, I/O streams and integration contracts.
 - FreeLSSD owns user space, GUI, frameworks, APIs, services and utilities.
 
-The version-2 boot hand-off provides both physical and mapped virtual addresses for the XIUL memory map. XIUL initializes a tested, fixed-capacity bootstrap physical-page allocator from conventional-memory regions before PCI enumeration. It is not a Mach pmap or a general virtual-memory manager.\n\nA physical device may be owned by one Mach-native or Linux driver at a time. Linux network devices connect to the BSD network stack through an explicit packet adapter.
+The version-2 boot hand-off provides both physical and mapped virtual addresses for the XIUL memory map. XIUL initializes a tested, fixed-capacity bootstrap physical-page allocator from conventional-memory regions before PCI enumeration. It is not a Mach pmap or a general virtual-memory manager.
+
+A physical device may be owned by one Mach-native or Linux driver at a time. Linux network devices connect to the BSD network stack through an explicit packet adapter.
 
 ## Verified implementation
 
@@ -26,7 +28,8 @@ The version-2 boot hand-off provides both physical and mapped virtual addresses 
 | Subsystem lifecycle | Dependency validation, cycle detection, phase-aware startup, reverse shutdown and failure rollback | Not connected to Mach bootstrap |
 | I/O streams | Bounded single-producer/single-consumer byte stream with partial nonblocking I/O and close semantics | Not yet connected to Mach IPC or real device drivers |
 | Device framework | Fixed-capacity device/driver registry, bus and ID matching, probe/bind and remove/unbind | No production hotplug serialization or full resource ownership |
-| Physical memory | EFI conventional-memory map ingestion, page alignment, extent coalescing, contiguous page allocation/release and accounting | Bootstrap allocator only; no page tables, pmap, virtual allocator, DMA zones or SMP-safe locking |\n| PCI | Generic enumeration, BAR sizing and x86_64 CF8/CFC / AArch64 ECAM configuration backends | Platform MMIO mapping, IRQ routing and DMA are incomplete |
+| Physical memory | EFI conventional-memory map ingestion, page alignment, extent coalescing, contiguous page allocation/release and accounting | Bootstrap allocator only; no page tables, pmap, virtual allocator, DMA zones or SMP-safe locking |
+| PCI | Generic enumeration, BAR sizing and x86_64 CF8/CFC / AArch64 ECAM configuration backends | Platform MMIO mapping, IRQ routing and DMA are incomplete |
 | Linux driver bridge | Narrow Linux-style PCI registration adapter | No general Linux kernel API environment; no upstream Linux driver has been built or run |
 | BSD networking | Network-interface and protocol-handler dispatch boundary | FreeBSD mbuf, sockets, routing and protocol stack are not adapted or linked |
 | BSD VFS | Mount/open/read/write/close and vnode contracts | FreeBSD VFS/vnode/filesystem sources are not adapted or linked |
