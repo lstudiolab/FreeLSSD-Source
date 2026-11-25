@@ -36,13 +36,16 @@ int main(void)
     assert(arch_calls == 0);
     info.version = XIUL_BOOT_INFO_VERSION;
     info.memory_map_entries = 1;
-    info.memory_map_physical = 0;
+    info.memory_map_physical = 0x1000;
+    info.memory_map_virtual = 0;
     assert(xiul_platform_initialize(&info) == XIUL_E_INVALID);
     assert(arch_calls == 0);
+    info.memory_map_virtual = 0xffff800000001000ULL;
     info.memory_map_entries = UINT64_MAX / sizeof(xiul_memory_region_t) + 1u;
-    info.memory_map_physical = 0x1000;
     assert(xiul_platform_initialize(&info) == XIUL_E_INVALID);
     info.memory_map_entries = 0;
+    info.memory_map_physical = 0;
+    info.memory_map_virtual = 0;
     assert(xiul_platform_initialize(&info) == XIUL_OK);
     assert(arch_calls == 1);
     arch_result = XIUL_E_INIT;
