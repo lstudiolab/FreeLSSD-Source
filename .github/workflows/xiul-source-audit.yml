@@ -4,14 +4,6 @@
 name: XIUL source audit
 
 on:
-  push:
-    paths:
-      - "kernel/xiul/**"
-      - ".github/workflows/xiul-source-audit.yml"
-  pull_request:
-    paths:
-      - "kernel/xiul/**"
-      - ".github/workflows/xiul-source-audit.yml"
   workflow_dispatch:
 
 permissions:
