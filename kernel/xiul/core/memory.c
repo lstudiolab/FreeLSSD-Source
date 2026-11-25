@@ -9,6 +9,8 @@ static xiul_memory_extent_t extents[XIUL_MEMORY_MAX_EXTENTS];
 static size_t extent_count;
 static uint64_t total_pages;
 static uint64_t free_pages;
+static xiul_memory_extent_t allocations[1024];
+static size_t allocation_count;
 static unsigned int initialized;
 
 static void remove_extent(size_t index)
@@ -34,6 +36,7 @@ xiul_status_t xiul_memory_initialize(const xiul_memory_region_t *regions,
     extent_count = 0;
     total_pages = 0;
     free_pages = 0;
+    allocation_count = 0;
 
     for (i = 0; i < region_count; ++i) {
         uint64_t end, base, length;
@@ -89,12 +92,17 @@ xiul_status_t xiul_memory_allocate_pages(size_t page_count, uint64_t *physical_a
     uint64_t bytes;
     if (!initialized || physical_address == 0 || page_count == 0)
         return XIUL_E_INVALID;
+    if (allocation_count == sizeof(allocations) / sizeof(allocations[0]))
+        return XIUL_E_CAPACITY;
     if ((uint64_t)page_count > UINT64_MAX / XIUL_PAGE_SIZE)
         return XIUL_E_INVALID;
     bytes = (uint64_t)page_count * XIUL_PAGE_SIZE;
     for (i = 0; i < extent_count; ++i) {
         if (extents[i].length < bytes) continue;
         *physical_address = extents[i].base;
+        allocations[allocation_count].base = extents[i].base;
+        allocations[allocation_count].length = bytes;
+        ++allocation_count;
         extents[i].base += bytes;
         extents[i].length -= bytes;
         free_pages -= (uint64_t)page_count;
@@ -107,7 +115,8 @@ xiul_status_t xiul_memory_allocate_pages(size_t page_count, uint64_t *physical_a
 xiul_status_t xiul_memory_release_pages(uint64_t physical_address, size_t page_count)
 {
     uint64_t bytes, end;
-    size_t position = 0;
+    size_t position = 0, allocation_index;
+    int merge_previous, merge_next;
     xiul_memory_extent_t extent;
     if (!initialized || page_count == 0 ||
         (physical_address & (XIUL_PAGE_SIZE - 1u)) != 0 ||
@@ -116,6 +125,10 @@ xiul_status_t xiul_memory_release_pages(uint64_t physical_address, size_t page_c
     bytes = (uint64_t)page_count * XIUL_PAGE_SIZE;
     if (physical_address > UINT64_MAX - bytes) return XIUL_E_INVALID;
     end = physical_address + bytes;
+    for (allocation_index = 0; allocation_index < allocation_count; ++allocation_index)
+        if (allocations[allocation_index].base == physical_address &&
+            allocations[allocation_index].length == bytes) break;
+    if (allocation_index == allocation_count) return XIUL_E_INVALID;
     while (position < extent_count && extents[position].base < physical_address)
         ++position;
     if ((position != 0 &&
@@ -123,22 +136,26 @@ xiul_status_t xiul_memory_release_pages(uint64_t physical_address, size_t page_c
         (position < extent_count && end > extents[position].base))
         return XIUL_E_INVALID;
     if ((uint64_t)page_count > total_pages - free_pages) return XIUL_E_INVALID;
-    if (extent_count == XIUL_MEMORY_MAX_EXTENTS) return XIUL_E_CAPACITY;
-
-    extent.base = physical_address;
-    extent.length = bytes;
-    insert_extent(position, extent);
-    if (position != 0 &&
-        extents[position - 1].base + extents[position - 1].length == extents[position].base) {
-        extents[position - 1].length += extents[position].length;
+    merge_previous = position != 0 &&
+        extents[position - 1].base + extents[position - 1].length == physical_address;
+    merge_next = position < extent_count && end == extents[position].base;
+    if (merge_previous && merge_next) {
+        extents[position - 1].length += bytes + extents[position].length;
         remove_extent(position);
-        --position;
+    } else if (merge_previous) {
+        extents[position - 1].length += bytes;
+    } else if (merge_next) {
+        extents[position].base = physical_address;
+        extents[position].length += bytes;
+    } else {
+        if (extent_count == XIUL_MEMORY_MAX_EXTENTS) return XIUL_E_CAPACITY;
+        extent.base = physical_address;
+        extent.length = bytes;
+        insert_extent(position, extent);
     }
-    if (position + 1 < extent_count &&
-        extents[position].base + extents[position].length == extents[position + 1].base) {
-        extents[position].length += extents[position + 1].length;
-        remove_extent(position + 1);
-    }
+    for (; allocation_index + 1 < allocation_count; ++allocation_index)
+        allocations[allocation_index] = allocations[allocation_index + 1];
+    --allocation_count;
     free_pages += (uint64_t)page_count;
     return XIUL_OK;
 }
