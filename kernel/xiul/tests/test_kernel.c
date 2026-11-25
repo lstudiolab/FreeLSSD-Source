@@ -11,6 +11,9 @@
 #include "xiul/subsystem.h"
 
 static int sequence[8], sequence_count;
+static const xiul_memory_region_t boot_memory[] = {
+    {0x100000, 0x100000, XIUL_MEMORY_TYPE_CONVENTIONAL, 0}
+};
 static size_t fake_devices;
 static xiul_status_t platform_result = XIUL_OK;
 
@@ -53,6 +56,9 @@ int main(void)
     boot.magic = XIUL_BOOT_INFO_MAGIC;
     boot.version = XIUL_BOOT_INFO_VERSION;
     boot.structure_size = sizeof(boot);
+    boot.memory_map_physical = 0x1000;
+    boot.memory_map_virtual = (uint64_t)(uintptr_t)boot_memory;
+    boot.memory_map_entries = sizeof(boot_memory) / sizeof(boot_memory[0]);
 
     assert(xiul_kernel_boot(&boot) == XIUL_OK);
     assert(sequence_count == 3);
