@@ -52,7 +52,7 @@ It does not:
 ## Remaining kernel milestones
 
 1. Implement a real UEFI/BIOS/Multiboot loader for each target; current entry stubs only consume the documented XIUL hand-off ABI and are not standalone bootloaders.
-2. Establish page tables and a virtual-memory/pmap layer on top of the bootstrap physical allocator, then add exception vectors, interrupt controllers, timers, firmware discovery and SMP bring-up.
+2. Establish page tables and a virtual-memory/pmap layer on top of the bootstrap physical allocator, then add interrupt controllers, timers, firmware discovery and SMP bring-up. Exception vectors are installed but currently halt on every exception.
 3. Audit selected Mach source dependencies and connect Mach VM, scheduler, task/thread and IPC bootstrap to XIUL.
 4. Complete device resource ownership, MMIO mapping, IRQ routing, DMA and I/O stream integration.
 5. Implement Linux driver compatibility APIs in dependency-driven layers and build/run an initial real PCI driver.
