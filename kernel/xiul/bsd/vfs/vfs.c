@@ -1,3 +1,8 @@
+/*
+ * Modified by L,Studio.
+ * Copyright (c) 2026 L,Studio.
+ */
+
 #include "xiul/vfs.h"
 
 static const xiul_filesystem_t *filesystems[XIUL_VFS_MAX_FILESYSTEMS];
