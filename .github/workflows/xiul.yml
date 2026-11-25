@@ -25,6 +25,27 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v4
+      sparse-checkout: |
+        /.github/workflows/xiul.yml
+        /.github/workflows/xiul-source-audit.yml
+        /kernel/xiul/Makefile
+        /kernel/xiul/xiul.toml
+        /kernel/xiul/README.md
+        /kernel/xiul/ARCHITECTURE.md
+        /kernel/xiul/UPSTREAM-SOURCES.txt
+        /kernel/xiul/INTEGRATION-STATUS.md
+        /kernel/xiul/boot/**
+        /kernel/xiul/core/**
+        /kernel/xiul/include/**
+        /kernel/xiul/io/**
+        /kernel/xiul/compat/**
+        /kernel/xiul/bsd/**
+        /kernel/xiul/platform/**
+        /kernel/xiul/tests/**
+        /kernel/xiul/mach/README.md
+        /kernel/xiul/linux/README
+        /kernel/xiul/freebsd/README.md
+      sparse-checkout-cone-mode: false
       - name: Install AArch64 cross toolchain
         run: |
           sudo apt-get update
