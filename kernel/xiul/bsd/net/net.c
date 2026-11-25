@@ -3,6 +3,11 @@
  * Copyright (c) 2026 L,Studio.
  */
 
+/*
+ * Modified by L,Studio.
+ * Copyright (c) 2026 L,Studio.
+ */
+
 #include "xiul/net.h"
 
 static xiul_netif_t *interfaces[XIUL_NETIF_MAX];
