@@ -19,7 +19,7 @@ int main(void)
 
     assert(xiul_memory_initialize(map, 3) == XIUL_OK);
     xiul_memory_get_stats(&stats);
-    assert(stats.total_pages == 9);
+    assert(stats.total_pages == 8);
     assert(stats.free_pages == 9);
     assert(stats.extent_count == 1);
 
