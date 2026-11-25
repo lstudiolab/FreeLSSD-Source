@@ -14,7 +14,7 @@ X86_64_CFLAGS = $(FREESTANDING_CFLAGS) -m64 -mno-red-zone -mcmodel=kernel
 ARM64_CFLAGS = $(FREESTANDING_CFLAGS) -mgeneral-regs-only
 
 XIUL_COMMON_SOURCES = \
-	core/subsystem.c core/device.c core/platform.c core/kernel.c core/pci.c \
+	core/subsystem.c core/device.c core/platform.c core/kernel.c core/pci.c core/pmm.c \
 	io/stream.c compat/linux/pci.c \
 	bsd/net/net.c bsd/vfs/vfs.c bsd/posix/syscall.c bsd/posix/fd.c bsd/nke/nke.c
 XIUL_X86_64_SOURCES = $(XIUL_COMMON_SOURCES) platform/x86_64/platform.c platform/x86_64/pci.c
@@ -55,6 +55,9 @@ $(BUILD_DIR)/test_posix: bsd/posix/syscall.c tests/test_posix.c include/xiul/pos
 $(BUILD_DIR)/test_posix_vfs: bsd/vfs/vfs.c bsd/posix/fd.c tests/test_posix_vfs.c include/xiul/vfs.h include/xiul/posix.h include/xiul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING bsd/vfs/vfs.c bsd/posix/fd.c tests/test_posix_vfs.c -o $@
 
+$(BUILD_DIR)/test_pmm: core/pmm.c tests/test_pmm.c include/xiul/pmm.h include/xiul/boot.h include/xiul/status.h | $(BUILD_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING core/pmm.c tests/test_pmm.c -o $@
+
 $(BUILD_DIR)/test_nke: bsd/nke/nke.c tests/test_nke.c include/xiul/nke.h include/xiul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING bsd/nke/nke.c tests/test_nke.c -o $@
 
@@ -64,7 +67,7 @@ $(BUILD_DIR)/test_platform: core/platform.c tests/test_platform.c include/xiul/p
 $(BUILD_DIR)/test_device: core/device.c tests/test_device.c include/xiul/device.h include/xiul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING core/device.c tests/test_device.c -o $@
 
-test: $(BUILD_DIR)/test_subsystem $(BUILD_DIR)/test_stream $(BUILD_DIR)/test_device $(BUILD_DIR)/test_platform $(BUILD_DIR)/test_kernel $(BUILD_DIR)/test_pci $(BUILD_DIR)/test_linux_pci $(BUILD_DIR)/test_net $(BUILD_DIR)/test_vfs $(BUILD_DIR)/test_posix $(BUILD_DIR)/test_posix_vfs $(BUILD_DIR)/test_nke
+test: $(BUILD_DIR)/test_subsystem $(BUILD_DIR)/test_stream $(BUILD_DIR)/test_device $(BUILD_DIR)/test_platform $(BUILD_DIR)/test_kernel $(BUILD_DIR)/test_pci $(BUILD_DIR)/test_linux_pci $(BUILD_DIR)/test_net $(BUILD_DIR)/test_vfs $(BUILD_DIR)/test_posix $(BUILD_DIR)/test_posix_vfs $(BUILD_DIR)/test_nke $(BUILD_DIR)/test_pmm
 	./$(BUILD_DIR)/test_subsystem
 	./$(BUILD_DIR)/test_stream
 	./$(BUILD_DIR)/test_device
@@ -77,6 +80,7 @@ test: $(BUILD_DIR)/test_subsystem $(BUILD_DIR)/test_stream $(BUILD_DIR)/test_dev
 	./$(BUILD_DIR)/test_posix
 	./$(BUILD_DIR)/test_posix_vfs
 	./$(BUILD_DIR)/test_nke
+	./$(BUILD_DIR)/test_pmm
 
 $(BUILD_DIR)/x86_64/%.o: %.c
 	@mkdir -p $(dir $@)
@@ -109,6 +113,8 @@ source-audit:
 	@test -f README.md
 	@test -f ARCHITECTURE.md
 	@test -f UPSTREAM-SOURCES.txt
+	@test -f core/pmm.c
+	@test -f include/xiul/pmm.h
 	@grep -q '^mach-osfmk ' UPSTREAM-SOURCES.txt
 	@grep -q '^linux ' UPSTREAM-SOURCES.txt
 	@grep -q '^freebsd ' UPSTREAM-SOURCES.txt

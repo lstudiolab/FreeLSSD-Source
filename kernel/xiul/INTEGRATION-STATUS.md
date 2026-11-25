@@ -25,7 +25,7 @@ A physical device may be owned by one Mach-native or Linux driver at a time. Lin
 |---|---|---|
 | Subsystem lifecycle | Dependency validation, cycle detection, phase-aware startup, reverse shutdown and failure rollback | Not connected to Mach bootstrap |
 | I/O streams | Bounded single-producer/single-consumer byte stream with partial nonblocking I/O and close semantics | Not yet connected to Mach IPC or real device drivers |
-| Device framework | Fixed-capacity device/driver registry, bus and ID matching, probe/bind and remove/unbind | No production hotplug serialization or full resource ownership |
+| Physical memory | Fixed-capacity extent allocator with page alignment, aligned allocation, exact allocation tracking, release and range coalescing | Host test added; not yet initialized from a real bootloader map or connected to Mach VM |\n| Device framework | Fixed-capacity device/driver registry, bus and ID matching, probe/bind and remove/unbind | No production hotplug serialization or full resource ownership |
 | PCI | Generic enumeration, BAR sizing and x86_64 CF8/CFC / AArch64 ECAM configuration backends | Platform MMIO mapping, IRQ routing and DMA are incomplete |
 | Linux driver bridge | Narrow Linux-style PCI registration adapter | No general Linux kernel API environment; no upstream Linux driver has been built or run |
 | BSD networking | Network-interface and protocol-handler dispatch boundary | FreeBSD mbuf, sockets, routing and protocol stack are not adapted or linked |
@@ -36,7 +36,7 @@ A physical device may be owned by one Mach-native or Linux driver at a time. Lin
 
 ## CI coverage
 
-The existing workflow runs source-layout audits, host-side tests and freestanding compilation/relocatable linking of XIUL-owned C objects for x86_64 and AArch64.
+The existing workflow runs source-layout audits, host-side tests (including the physical-page allocator) and freestanding compilation/relocatable linking of XIUL-owned C objects for x86_64 and AArch64.
 
 It does not:
 - build a final bootable kernel image;
@@ -49,13 +49,13 @@ It does not:
 
 1. Define and implement the boot protocol, architecture entry assembly, linker scripts and final image for each target.
 2. Establish page tables, exception vectors, interrupt controllers, timers, firmware discovery and SMP bring-up.
-3. Audit selected Mach source dependencies and connect Mach VM, scheduler, task/thread and IPC bootstrap to XIUL.
-4. Complete device resource ownership, MMIO mapping, IRQ routing, DMA and I/O stream integration.
-5. Implement Linux driver compatibility APIs in dependency-driven layers and build/run an initial real PCI driver.
-6. Connect Linux network drivers to BSD packet buffers and adapt a real BSD networking path.
-7. Adapt FreeBSD VFS/vnode/buffer/page-cache contracts and integrate an initial filesystem.
-8. Complete process creation, user-memory validation, POSIX syscall ABI, file descriptors and signals.
-9. Implement NKE ABI versioning, lifetime tracking, synchronization and safe unload.
-10. Add QEMU boot, device, networking, filesystem and ABI tests for x86_64 and AArch64, followed by physical hardware validation.
+3. Connect the physical allocator to a real boot memory map and Mach pmap/VM; implement page-table allocation and virtual mappings.\n4. Audit selected Mach source dependencies and connect Mach VM, scheduler, task/thread and IPC bootstrap to XIUL.
+5. Complete device resource ownership, MMIO mapping, IRQ routing, DMA and I/O stream integration.
+6. Implement Linux driver compatibility APIs in dependency-driven layers and build/run an initial real PCI driver.
+7. Connect Linux network drivers to BSD packet buffers and adapt a real BSD networking path.
+8. Adapt FreeBSD VFS/vnode/buffer/page-cache contracts and integrate an initial filesystem.
+9. Complete process creation, user-memory validation, POSIX syscall ABI, file descriptors and signals.
+10. Implement NKE ABI versioning, lifetime tracking, synchronization and safe unload.
+11. Add QEMU boot, device, networking, filesystem and ABI tests for x86_64 and AArch64, followed by physical hardware validation.
 
 XIUL remains integration-in-progress. It must not be described as complete or bootable until these milestones are implemented and verified.
