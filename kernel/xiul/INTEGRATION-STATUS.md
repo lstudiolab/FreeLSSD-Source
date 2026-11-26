@@ -5,7 +5,7 @@ Copyright (c) 2026 L,Studio. All rights reserved.
 
 # XIUL Integration Status
 
-Last updated: 2026-11-25
+Last updated: 2026-11-26
 
 This status distinguishes imported source, XIUL-owned tested code and upstream integration. An imported source directory is not proof that the code has been adapted, linked or executed.
 
@@ -35,7 +35,7 @@ A physical device may be owned by one Mach-native or Linux driver at a time. Lin
 | BSD networking | Network-interface and protocol-handler dispatch boundary | FreeBSD mbuf, sockets, routing and protocol stack are not adapted or linked |
 | BSD VFS | Mount/open/read/write/close and vnode contracts | FreeBSD VFS/vnode/filesystem sources are not adapted or linked |
 | POSIX | Syscall dispatch and per-process file-descriptor table connected to VFS | No complete process model, user-memory boundary, signal model or ABI |
-| NKE | Priority-ordered packet hooks | No loadable module ABI or safe unload |
+| NKE | Priority-ordered packet hooks are now invoked on BSD network ingress and egress; accepted hook edits are propagated and drops return `XIUL_E_DROPPED` | No loadable module ABI, hook lifetime protection, concurrent registration synchronization or safe unload |
 | x86_64 / AArch64 | Loader hand-off entry stubs, bootstrap stacks, linker scripts, early console, CPU/IRQ primitives, x86_64 256-entry IDT with vector/error diagnostics, AArch64 VBAR vectors at EL1 or EL2 with vector-slot/ESR diagnostics and PCI config access; Makefile links XIUL-owned ELF images | Loader required; exception handlers remain diagnostic fail-stop; no page-table/VM bootstrap, APIC/GIC routing, timer, SMP or QEMU boot verification |
 
 ## CI coverage
