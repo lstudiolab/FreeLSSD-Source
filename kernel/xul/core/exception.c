@@ -6,6 +6,8 @@
 #include <stdint.h>
 #include "xul/platform.h"
 
+static volatile uint64_t xul_timer_ticks;
+
 static void write_hex(uint64_t value)
 {
     static const char digits[] = "0123456789abcdef";
@@ -27,6 +29,18 @@ _Noreturn void xul_exception_dispatch(uint64_t vector, uint64_t error_code)
     write_hex(error_code);
     xul_platform_console_write("\n");
     xul_platform_halt();
+}
+
+void xul_interrupt_dispatch(uint64_t vector, uint64_t error_code)
+{
+    if (vector == 32u) {
+        if (xul_timer_ticks == 0)
+            xul_platform_console_write("XUL: PIT timer interrupt received\n");
+        ++xul_timer_ticks;
+        xul_platform_irq_eoi(vector);
+        return;
+    }
+    xul_exception_dispatch(vector, error_code);
 }
 
 _Noreturn void xul_exception_fatal(void)
