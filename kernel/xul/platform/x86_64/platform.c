@@ -98,6 +98,8 @@ void xul_platform_irq_restore(xul_irq_state_t state)
 {
     if ((state & (uintptr_t)0x200u) != 0) {
         __asm__ volatile ("sti" : : : "memory");
+    } else {
+        __asm__ volatile ("cli" : : : "memory");
     }
 }
 
