@@ -9,7 +9,7 @@ mkdir -p "$(dirname "$LOG")"
 
 set +e
 timeout 20s qemu-system-x86_64 \
-    -machine q35 -m 512M -cdrom "$IMAGE" \
+    -machine q35 -m 512M -cdrom "$IMAGE" -boot d \
     -serial stdio -display none -monitor none \
     -no-reboot -no-shutdown >"$LOG" 2>&1
 status=$?
