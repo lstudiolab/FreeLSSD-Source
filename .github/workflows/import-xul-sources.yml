@@ -1,0 +1,27 @@
+# This file has been modified by L,Studio.
+# Copyright (c) 2026 L,Studio. All rights reserved.
+
+name: Import XUL upstream source
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: xul-source-import
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - name: Check out FreeLSSD
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Import forked source trees into kernel/xul
+        run: bash scripts/import-xul-sources.sh
