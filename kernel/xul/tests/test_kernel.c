@@ -61,6 +61,22 @@ int main(void)
     boot.memory_map_virtual = (uint64_t)(uintptr_t)boot_memory;
     boot.memory_map_entries = sizeof(boot_memory) / sizeof(boot_memory[0]);
 
+    /* Reject malformed physical and virtual memory-map ranges before init. */
+    {
+        uint64_t valid_physical = boot.memory_map_physical;
+        uint64_t valid_virtual = boot.memory_map_virtual;
+        boot.memory_map_physical = 0;
+        assert(xul_kernel_boot(&boot) == XUL_E_INVALID);
+        boot.memory_map_physical = valid_physical + 1;
+        assert(xul_kernel_boot(&boot) == XUL_E_INVALID);
+        boot.memory_map_physical = UINT64_MAX - 7u;
+        assert(xul_kernel_boot(&boot) == XUL_E_INVALID);
+        boot.memory_map_physical = valid_physical;
+        boot.memory_map_virtual = valid_virtual + 1;
+        assert(xul_kernel_boot(&boot) == XUL_E_INVALID);
+        boot.memory_map_virtual = valid_virtual;
+    }
+
     assert(xul_kernel_boot(&boot) == XUL_OK);
     assert(sequence_count == 3);
     assert(sequence[0] == 1 && sequence[1] == 2 && sequence[2] == 3);
