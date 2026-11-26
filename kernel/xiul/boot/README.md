@@ -6,53 +6,50 @@ Copyright (c) 2026 L,Studio. All rights reserved.
 # XIUL boot contract
 
 XIUL's common kernel entry consumes the versioned `xiul_boot_info_t`
-structure defined in `include/xiul/boot.h`. The current hand-off ABI version is 2.
+structure defined in `include/xiul/boot.h`. The current hand-off ABI version
+is 2.
 
-## Limine boot protocol
+## Limine boot path
 
-The x86_64 and AArch64 ELF images now contain Limine protocol requests for
-the memory map, higher-half direct map, executable physical/virtual base and
-a 64 KiB boot stack. The linker scripts retain the request markers and request
-records. Limine enters `xiul_limine_entry`, which validates the responses,
-copies Limine's pointer-array memory map into XIUL's contiguous boot ABI, maps
-usable memory to XIUL's conventional-memory type, and calls
-`xiul_kernel_entry`.
+The x86_64 and AArch64 ELF images are linked with `xiul_limine_entry` as
+their entry point. They include Limine protocol requests for:
 
-Use `boot/limine/limine.conf` as the Limine menu configuration. Place the
-architecture-matching XIUL ELF at `/boot/xiul.elf` on the boot volume. The
-Limine bootloader itself is a separate boot component and is not vendored into
-XIUL. This repository currently builds the Limine-loadable ELF, not a
-self-contained ISO or disk image. The AArch64 platform still needs firmware
-device-tree parsing for UART and PCI ECAM discovery; absent those mappings,
-those optional devices remain unavailable.
+- the higher-half direct map (HHDM);
+- the firmware memory map;
+- the kernel image's physical and virtual base addresses;
+- a 64 KiB boot stack.
 
-This is a loader hand-off ABI, not a complete bootloader implementation.
-The loader must establish the architecture's required execution mode,
-provide a valid stack, map the kernel image and the memory-map array, and populate every physical
-address and optional device mapping accurately. `memory_map_physical` records the physical address;
-`memory_map_virtual` is the directly dereferenceable virtual mapping used during early bootstrap.
+The linker scripts retain the request markers and request records. Limine
+loads and maps the ELF image, establishes the architecture's initial execution
+state, and transfers control to `xiul_limine_entry`. XIUL validates the
+responses, copies Limine's pointer-array memory map into a bounded contiguous
+array, converts usable regions to XIUL's conventional-memory type, derives
+the physical address of that array, and enters `xiul_kernel_entry`.
 
-## x86_64 entry
+Use `boot/limine/limine.conf` as the boot menu configuration and place the
+architecture-matching ELF at `/boot/xiul.elf` on the boot volume. The Limine
+bootloader is a separate component and is not vendored into XIUL. This
+repository currently builds Limine-loadable ELF images, not a self-contained
+ISO or disk image.
 
-The loader transfers control to `xiul_arch_entry` in 64-bit long mode
-with the hand-off pointer in RDI (System V AMD64 ABI). Paging must be
-enabled, the kernel image and stack mapped, and interrupts disabled.
-The entry switches to an XIUL-owned bootstrap stack before calling C.
+## Legacy loader hand-off
 
-## AArch64 entry
-
-The loader transfers control to `xiul_arch_entry` at EL1 or EL2 with
-the hand-off pointer in X0. The kernel image and bootstrap stack must
-be mapped, and asynchronous exceptions masked. The entry establishes
-an aligned bootstrap stack before calling C. XIUL then installs the VBAR
-vector table for the active exception level (EL1 or EL2). All vector classes report their vector slot and ESR syndrome, then enter a fail-stop handler; GIC routing and interrupt dispatch are not implemented.
+The retained `xiul_arch_entry` assembly stubs support loaders that implement
+XIUL's original hand-off ABI directly. On x86_64, the loader passes a pointer
+to `xiul_boot_info_t` in RDI while in 64-bit long mode. On AArch64, it passes
+the pointer in X0 at EL1 or EL2. In both cases, the loader must map the kernel
+image, hand-off structure and memory-map array, provide a valid stack, and
+mask interrupts before transferring control.
 
 ## Current limitations
 
-These entry stubs are not UEFI applications, BIOS boot sectors, or
-Multiboot2 loaders. A loader is still required to load the ELF image,
-establish page tables (including a mapping for `memory_map_virtual`) and construct the hand-off structure. The platform now installs an x86_64 IDT and an AArch64 EL1 vector table.
-Unhandled exceptions and interrupts are diagnostic fail-stop (x86_64 reports vector/error code; AArch64 reports vector slot/ESR). The current platform code
-does not establish a complete virtual-memory manager, interrupt controller,
-timer, or SMP environment.
-Do not treat entry-stub compilation as proof of a bootable kernel.
+Limine boot support does not mean the kernel's runtime is complete. The
+AArch64 platform still needs device-tree parsing for UART and PCI ECAM
+discovery. Neither architecture yet has a complete Mach pmap/VM bootstrap,
+interrupt-controller routing, timer subsystem or SMP bring-up. Exception
+vectors are diagnostic fail-stop handlers. The bootloader binaries, ISO/disk
+image packaging and QEMU boot verification are not yet included.
+
+Do not describe XIUL as a complete operating system kernel until its Mach
+runtime, Linux driver environment, BSD services and end-to-end hardware paths
+have been integrated and tested.
