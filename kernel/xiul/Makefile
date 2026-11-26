@@ -151,6 +151,7 @@ source-audit:
 	@test -f boot/README.md
 	@test -f boot/limine/limine.conf
 	@test -f boot/limine/build-image.sh
+	@test -f boot/limine/qemu-smoke.sh
 	@test -f boot/limine/entry.c
 	@test -f boot/limine/requests.c
 	@test -f include/xiul/limine.h
