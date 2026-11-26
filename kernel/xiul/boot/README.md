@@ -5,8 +5,26 @@ Copyright (c) 2026 L,Studio. All rights reserved.
 
 # XIUL boot contract
 
-XIUL's architecture entry points consume a pointer to the versioned
-`xiul_boot_info_t` structure defined in `include/xiul/boot.h`. The current hand-off ABI version is 2.
+XIUL's common kernel entry consumes the versioned `xiul_boot_info_t`
+structure defined in `include/xiul/boot.h`. The current hand-off ABI version is 2.
+
+## Limine boot protocol
+
+The x86_64 and AArch64 ELF images now contain Limine protocol requests for
+the memory map, higher-half direct map, executable physical/virtual base and
+a 64 KiB boot stack. The linker scripts retain the request markers and request
+records. Limine enters `xiul_limine_entry`, which validates the responses,
+copies Limine's pointer-array memory map into XIUL's contiguous boot ABI, maps
+usable memory to XIUL's conventional-memory type, and calls
+`xiul_kernel_entry`.
+
+Use `boot/limine/limine.conf` as the Limine menu configuration. Place the
+architecture-matching XIUL ELF at `/boot/xiul.elf` on the boot volume. The
+Limine bootloader itself is a separate boot component and is not vendored into
+XIUL. This repository currently builds the Limine-loadable ELF, not a
+self-contained ISO or disk image. The AArch64 platform still needs firmware
+device-tree parsing for UART and PCI ECAM discovery; absent those mappings,
+those optional devices remain unavailable.
 
 This is a loader hand-off ABI, not a complete bootloader implementation.
 The loader must establish the architecture's required execution mode,
