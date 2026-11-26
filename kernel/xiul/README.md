@@ -15,7 +15,7 @@ XIUL is the kernel of FreeLSSD. It uses a Mach microkernel foundation, BSD kerne
 - **XIUL:** boot hand-off validation, bootstrap physical-page allocation, device ownership, I/O coordination and integration contracts between the three.
 - **Stela:** user space, GUI, native frameworks, BSD/Classic/QuickTime-compatible APIs, services and system utilities.
 
-A device can use a Mach-native driver or a Linux driver. XIUL's device framework arbitrates ownership so that two drivers cannot concurrently control the same physical device. Linux network drivers hand packets to BSD networking through an explicit adapter.
+A device can use a Mach-native driver or a Linux driver. XIUL's device framework arbitrates ownership so that two drivers cannot concurrently control the same physical device. Linux network devices use an explicit `net_device`-style adapter to pass ingress packets into BSD networking and route BSD egress through the driver's `ndo_start_xmit` callback. BSD network ingress and egress both pass through NKE hooks.
 
 ## Source ownership
 
@@ -40,6 +40,6 @@ make -C kernel/xiul test
 make -C kernel/xiul arch-build
 ```
 
-These commands validate XIUL-owned host tests (including physical-page allocation) and link freestanding ELF images for x86_64 and AArch64. The version-2 boot ABI requires the loader to provide a mapped memory-map array; XIUL initializes its bootstrap physical-page allocator from conventional-memory entries. The ELF images require an external loader that constructs `xiul_boot_info_t`; they are not standalone bootable media. The commands do not compile upstream Mach, Linux drivers or FreeBSD networking/filesystems against XIUL. See `boot/README.md` for the exact loader hand-off contract.
+These commands validate XIUL-owned host tests (including physical-page allocation and Linux-netdev/BSD-network integration) and link freestanding ELF images for x86_64 and AArch64. Both images now include a Limine protocol adapter that constructs the version-2 `xiul_boot_info_t` hand-off from Limine's memory-map and executable-address responses. The Limine bootloader remains external; ISO/disk-image packaging and QEMU boot verification are not yet included. The commands do not compile upstream Mach, Linux drivers or FreeBSD networking/filesystems against XIUL. See `boot/README.md` for the Limine and legacy loader contracts.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) and [INTEGRATION-STATUS.md](INTEGRATION-STATUS.md) for contracts, ownership rules and remaining work. Upstream source directories are not evidence of completed integration.
