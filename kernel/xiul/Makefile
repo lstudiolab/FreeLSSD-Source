@@ -10,7 +10,7 @@ BUILD_DIR ?= .build
 CPPFLAGS += -Iinclude -Iio
 CFLAGS ?= -std=c11 -O2 -Wall -Wextra -Werror -pedantic
 FREESTANDING_CFLAGS = -std=c11 -O2 -Wall -Wextra -Werror -ffreestanding -fno-builtin -fno-stack-protector -fno-pic -fno-pie
-X86_64_CFLAGS = $(FREESTANDING_CFLAGS) -m64 -mno-red-zone -mcmodel=kernel
+X86_64_CFLAGS = $(FREESTANDING_CFLAGS) -m64 -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -mno-80387 -mcmodel=kernel
 ARM64_CFLAGS = $(FREESTANDING_CFLAGS) -mgeneral-regs-only
 
 XIUL_COMMON_SOURCES = \
