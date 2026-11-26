@@ -7,7 +7,7 @@
  */
 .section .text.exceptions,"ax",@progbits
 .code64
-.extern xul_exception_fatal
+.extern xul_interrupt_dispatch
 .global xul_x86_64_isr_0
 .type xul_x86_64_isr_0,@function
 xul_x86_64_isr_0:
@@ -1556,15 +1556,30 @@ xul_x86_64_isr_common:
     pushq %r14
     pushq %r15
 
-    /* Normalized frame: vector at +120, CPU error code at +128. */
-    movq 120(%rsp), %rdi
-    movq 128(%rsp), %rsi
+    /* Preserve the normalized frame while aligning the C call stack. */
+    movq %rsp, %r12
+    movq 120(%r12), %rdi
+    movq 128(%r12), %rsi
     andq $-16, %rsp
-    call xul_exception_dispatch
-1:
-    cli
-    hlt
-    jmp 1b
+    call xul_interrupt_dispatch
+    movq %r12, %rsp
+    popq %r15
+    popq %r14
+    popq %r13
+    popq %r12
+    popq %r11
+    popq %r10
+    popq %r9
+    popq %r8
+    popq %rdi
+    popq %rsi
+    popq %rbp
+    popq %rdx
+    popq %rcx
+    popq %rbx
+    popq %rax
+    addq $16, %rsp
+    iretq
 .size xul_x86_64_isr_common, .-xul_x86_64_isr_common
 
 .section .rodata.exceptions,"a",@progbits
