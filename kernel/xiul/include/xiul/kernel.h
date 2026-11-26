@@ -18,6 +18,9 @@ struct xiul_kernel_context {
     size_t pci_devices;
 };
 
+/* Common non-returning C entry used by the Limine and legacy boot paths. */
+_Noreturn void xiul_kernel_entry(const xiul_boot_info_t *boot_info);
+
 /* Entry called by the architecture boot stub after the handoff is available. */
 xiul_status_t xiul_kernel_boot(const xiul_boot_info_t *boot_info);
 void xiul_kernel_shutdown(void);
