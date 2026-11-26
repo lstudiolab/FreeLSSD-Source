@@ -26,11 +26,12 @@ responses, copies Limine's pointer-array memory map into a bounded contiguous
 array, converts usable regions to XIUL's conventional-memory type, derives
 the physical address of that array, and enters `xiul_kernel_entry`.
 
-Use `boot/limine/limine.conf` as the boot menu configuration and place the
-architecture-matching ELF at `/boot/xiul.elf` on the boot volume. The Limine
-bootloader is a separate component and is not vendored into XIUL. This
-repository currently builds Limine-loadable ELF images, not a self-contained
-ISO or disk image.
+Use `make -C kernel/xiul limine-image-x86_64` or
+`make -C kernel/xiul limine-image-arm64` to create an architecture-specific
+bootable ISO. The build downloads the official Limine v12.9.6 binary package
+and verifies its SHA-256 before packaging. The Limine bootloader remains a
+separate component and is not vendored into XIUL. Disk-image packaging is not
+included.
 
 ## Legacy loader hand-off
 
@@ -47,8 +48,8 @@ Limine boot support does not mean the kernel's runtime is complete. The
 AArch64 platform still needs device-tree parsing for UART and PCI ECAM
 discovery. Neither architecture yet has a complete Mach pmap/VM bootstrap,
 interrupt-controller routing, timer subsystem or SMP bring-up. Exception
-vectors are diagnostic fail-stop handlers. The bootloader binaries, ISO/disk
-image packaging and QEMU boot verification are not yet included.
+vectors are diagnostic fail-stop handlers. The x86_64 ISO has a QEMU smoke test in GitHub Actions. AArch64 ISO runtime
+boot verification, a full VM bootstrap and disk-image packaging remain open.
 
 Do not describe XIUL as a complete operating system kernel until its Mach
 runtime, Linux driver environment, BSD services and end-to-end hardware paths
