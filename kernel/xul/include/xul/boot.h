@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 
-#define XUL_BOOT_INFO_MAGIC UINT64_C(0x5849554c424f4f54)
+#define XUL_BOOT_INFO_MAGIC UINT64_C(0x58554c424f4f5400)
 #define XUL_BOOT_INFO_VERSION 2u
 
 /*
