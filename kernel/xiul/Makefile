@@ -15,7 +15,7 @@ ARM64_CFLAGS = $(FREESTANDING_CFLAGS) -mgeneral-regs-only
 
 XIUL_COMMON_SOURCES = \
 	core/subsystem.c core/device.c core/platform.c core/kernel.c core/memory.c core/runtime.c core/entry.c core/exception.c core/pci.c \
-	io/stream.c compat/linux/pci.c \
+	io/stream.c compat/linux/pci.c compat/linux/net.c \
 	bsd/net/net.c bsd/vfs/vfs.c bsd/posix/syscall.c bsd/posix/fd.c bsd/nke/nke.c
 XIUL_X86_64_SOURCES = $(XIUL_COMMON_SOURCES) platform/x86_64/platform.c platform/x86_64/pci.c platform/x86_64/exception.c
 XIUL_ARM64_SOURCES = $(XIUL_COMMON_SOURCES) platform/arm64/platform.c platform/arm64/pci.c
@@ -49,6 +49,9 @@ $(BUILD_DIR)/test_linux_pci: core/device.c compat/linux/pci.c tests/test_linux_p
 $(BUILD_DIR)/test_net: bsd/net/net.c bsd/nke/nke.c tests/test_net.c include/xiul/net.h include/xiul/nke.h include/xiul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING bsd/net/net.c bsd/nke/nke.c tests/test_net.c -o $@
 
+$(BUILD_DIR)/test_linux_net: bsd/net/net.c bsd/nke/nke.c compat/linux/net.c tests/test_linux_net.c include/xiul/linux_net.h include/xiul/net.h include/xiul/nke.h include/xiul/status.h | $(BUILD_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING bsd/net/net.c bsd/nke/nke.c compat/linux/net.c tests/test_linux_net.c -o $@
+
 $(BUILD_DIR)/test_vfs: bsd/vfs/vfs.c tests/test_vfs.c include/xiul/vfs.h include/xiul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING bsd/vfs/vfs.c tests/test_vfs.c -o $@
 
@@ -67,7 +70,7 @@ $(BUILD_DIR)/test_platform: core/platform.c tests/test_platform.c include/xiul/p
 $(BUILD_DIR)/test_device: core/device.c tests/test_device.c include/xiul/device.h include/xiul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING core/device.c tests/test_device.c -o $@
 
-test: $(BUILD_DIR)/test_subsystem $(BUILD_DIR)/test_stream $(BUILD_DIR)/test_device $(BUILD_DIR)/test_platform $(BUILD_DIR)/test_kernel $(BUILD_DIR)/test_memory $(BUILD_DIR)/test_pci $(BUILD_DIR)/test_linux_pci $(BUILD_DIR)/test_net $(BUILD_DIR)/test_vfs $(BUILD_DIR)/test_posix $(BUILD_DIR)/test_posix_vfs $(BUILD_DIR)/test_nke
+test: $(BUILD_DIR)/test_subsystem $(BUILD_DIR)/test_stream $(BUILD_DIR)/test_device $(BUILD_DIR)/test_platform $(BUILD_DIR)/test_kernel $(BUILD_DIR)/test_memory $(BUILD_DIR)/test_pci $(BUILD_DIR)/test_linux_pci $(BUILD_DIR)/test_net $(BUILD_DIR)/test_linux_net $(BUILD_DIR)/test_vfs $(BUILD_DIR)/test_posix $(BUILD_DIR)/test_posix_vfs $(BUILD_DIR)/test_nke
 	./$(BUILD_DIR)/test_subsystem
 	./$(BUILD_DIR)/test_stream
 	./$(BUILD_DIR)/test_device
@@ -77,6 +80,7 @@ test: $(BUILD_DIR)/test_subsystem $(BUILD_DIR)/test_stream $(BUILD_DIR)/test_dev
 	./$(BUILD_DIR)/test_pci
 	./$(BUILD_DIR)/test_linux_pci
 	./$(BUILD_DIR)/test_net
+	./$(BUILD_DIR)/test_linux_net
 	./$(BUILD_DIR)/test_vfs
 	./$(BUILD_DIR)/test_posix
 	./$(BUILD_DIR)/test_posix_vfs
