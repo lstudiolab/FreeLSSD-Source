@@ -31,6 +31,7 @@ fboot_status_t fboot_elf64_validate(const void *image,
     uint64_t highest = 0;
     uint64_t phdr_bytes;
     uint16_t loads = 0;
+    int entry_is_executable = 0;
     uint16_t i;
     uint16_t j;
 
@@ -74,6 +75,7 @@ fboot_status_t fboot_elf64_validate(const void *image,
             ph->virtual_address > UINT64_MAX - ph->memory_size)
             return FBOOT_E_RANGE;
         if ((ph->flags & ~(FBOOT_PF_R | FBOOT_PF_W | FBOOT_PF_X)) != 0 ||
+            (ph->flags & FBOOT_PF_R) == 0 ||
             (ph->flags & (FBOOT_PF_W | FBOOT_PF_X)) ==
                 (FBOOT_PF_W | FBOOT_PF_X))
             return FBOOT_E_SECURITY;
@@ -83,6 +85,9 @@ fboot_status_t fboot_elf64_validate(const void *image,
             return FBOOT_E_FORMAT;
         if (ph->memory_size == 0) continue;
         end = ph->virtual_address + ph->memory_size;
+        if ((ph->flags & FBOOT_PF_X) != 0 &&
+            header->entry >= ph->virtual_address && header->entry < end)
+            entry_is_executable = 1;
         if (ph->virtual_address < lowest) lowest = ph->virtual_address;
         if (end > highest) highest = end;
         ++loads;
@@ -98,7 +103,8 @@ fboot_status_t fboot_elf64_validate(const void *image,
         }
     }
 
-    if (loads == 0 || header->entry < lowest || header->entry >= highest)
+    if (loads == 0 || header->entry < lowest || header->entry >= highest ||
+        !entry_is_executable)
         return FBOOT_E_FORMAT;
 
     result->physical_base = 0;
