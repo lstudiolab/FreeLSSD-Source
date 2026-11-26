@@ -46,8 +46,8 @@ $(BUILD_DIR)/test_pci: core/device.c core/pci.c compat/linux/pci.c tests/test_pc
 $(BUILD_DIR)/test_linux_pci: core/device.c compat/linux/pci.c tests/test_linux_pci.c include/xiul/linux_pci.h include/xiul/device.h include/xiul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING core/device.c compat/linux/pci.c tests/test_linux_pci.c -o $@
 
-$(BUILD_DIR)/test_net: bsd/net/net.c tests/test_net.c include/xiul/net.h include/xiul/status.h | $(BUILD_DIR)
-	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING bsd/net/net.c tests/test_net.c -o $@
+$(BUILD_DIR)/test_net: bsd/net/net.c bsd/nke/nke.c tests/test_net.c include/xiul/net.h include/xiul/nke.h include/xiul/status.h | $(BUILD_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING bsd/net/net.c bsd/nke/nke.c tests/test_net.c -o $@
 
 $(BUILD_DIR)/test_vfs: bsd/vfs/vfs.c tests/test_vfs.c include/xiul/vfs.h include/xiul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DXIUL_TESTING bsd/vfs/vfs.c tests/test_vfs.c -o $@
