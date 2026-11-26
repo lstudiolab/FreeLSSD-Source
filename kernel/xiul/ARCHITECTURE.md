@@ -3,9 +3,9 @@ This file has been modified by L,Studio.
 Copyright (c) 2026 L,Studio. All rights reserved.
 -->
 
-# XIUL Kernel Architecture
+# XUL Kernel Architecture
 
-XIUL is the kernel of FreeLSSD. Its design follows the layered organization of Darwin/XNU, but XIUL is an independent integration of Mach mechanisms, BSD kernel functionality and Linux driver infrastructure.
+XUL is the kernel of FreeLSSD. Its design follows the layered organization of Darwin/XNU, but XUL is an independent integration of Mach mechanisms, BSD kernel functionality and Linux driver infrastructure.
 
 ## Kernel ownership model
 
@@ -18,7 +18,7 @@ FreeLSSD
   |     +-- QuickTime-compatible APIs
   |     +-- FreeLSSD GUI, services and utilities
   |
-  +-- XIUL kernel
+  +-- XUL kernel
         +-- Mach foundation
         |     +-- Tasks, threads and scheduling
         |     +-- IPC and synchronization primitives
@@ -30,7 +30,7 @@ FreeLSSD
         |     +-- Linux driver model and required kernel APIs
         |     +-- Linux PCI / USB / bus drivers
         |     +-- Linux storage, network, graphics and input drivers
-        |     +-- XIUL adapters for memory, DMA, IRQ, locks,
+        |     +-- XUL adapters for memory, DMA, IRQ, locks,
         |         timers, workqueues and device lifecycle
         |
         +-- BSD kernel functionality
@@ -47,25 +47,25 @@ This is the logical ownership model. It does not claim that upstream code is alr
 
 | Component | Responsibility | Resource owner |
 |---|---|---|
-| Mach | Microkernel mechanisms, IPC, scheduling, VM primitives, I/O streams | XIUL core |
-| Mach-native drivers | Drivers written specifically for XIUL | XIUL device framework |
-| Linux driver environment | Preserve Linux driver source and the Linux APIs those drivers require | Linux compatibility environment, coordinated by XIUL |
+| Mach | Microkernel mechanisms, IPC, scheduling, VM primitives, I/O streams | XUL core |
+| Mach-native drivers | Drivers written specifically for XUL | XUL device framework |
+| Linux driver environment | Preserve Linux driver source and the Linux APIs those drivers require | Linux compatibility environment, coordinated by XUL |
 | BSD networking | Protocols, sockets, routing and network services | BSD networking subsystem |
 | BSD filesystems | VFS, vnode and filesystem behavior | BSD VFS subsystem |
 | POSIX | User/kernel ABI and process-facing syscall semantics | BSD-compatible syscall layer |
-| NKE | Versioned network extension hooks | XIUL/BSD network integration |
+| NKE | Versioned network extension hooks | XUL/BSD network integration |
 | FreeLSSD user space | GUI, frameworks, APIs, services and utilities | FreeLSSD |
 
 ## Critical integration rules
 
-1. Mach is the microkernel foundation. XIUL must not create competing global owners for CPU scheduling, address-space management, IPC or physical memory.
-2. Linux driver source stays in the Linux source tree. Drivers are not copied into a new XIUL driver implementation. The compatibility environment must supply the Linux kernel interfaces required by each selected driver.
-3. Linux and Mach drivers may coexist. A physical device has exactly one active owner at a time; probe, bind, handoff and removal must be serialized by the XIUL device framework.
-4. Linux driver access to hardware is mediated by explicit XIUL platform contracts for MMIO, port I/O, interrupts, DMA, PCI/USB resources, power and reset. No driver may bypass resource ownership.
+1. Mach is the microkernel foundation. XUL must not create competing global owners for CPU scheduling, address-space management, IPC or physical memory.
+2. Linux driver source stays in the Linux source tree. Drivers are not copied into a new XUL driver implementation. The compatibility environment must supply the Linux kernel interfaces required by each selected driver.
+3. Linux and Mach drivers may coexist. A physical device has exactly one active owner at a time; probe, bind, handoff and removal must be serialized by the XUL device framework.
+4. Linux driver access to hardware is mediated by explicit XUL platform contracts for MMIO, port I/O, interrupts, DMA, PCI/USB resources, power and reset. No driver may bypass resource ownership.
 5. BSD owns networking protocols and filesystems. A Linux network driver supplies the hardware-facing network device; packets cross a defined adapter into the BSD network stack. Linux networking is not substituted for BSD networking.
-6. BSD POSIX APIs are exposed to FreeLSSD user space through XIUL syscall and process services. BSD headers alone do not implement a syscall ABI.
+6. BSD POSIX APIs are exposed to FreeLSSD user space through XUL syscall and process services. BSD headers alone do not implement a syscall ABI.
 7. Mach-native drivers remain supported and are not required to use Linux compatibility.
-8. I/O streams are XIUL-owned interfaces connecting device producers and kernel consumers. They do not imply that Apple's I/O Kit source has been imported.
+8. I/O streams are XUL-owned interfaces connecting device producers and kernel consumers. They do not imply that Apple's I/O Kit source has been imported.
 9. Upstream source is source material, not proof of integration. Every port must have a dependency inventory, build result and runtime test.
 10. Preserve upstream copyright and license notices. Review per-file licensing before linking or distributing Mach-, Linux- or FreeBSD-derived code.
 
@@ -84,9 +84,9 @@ This is the logical ownership model. It does not claim that upstream code is alr
 
 1. Package the Limine-compatible x86_64/AArch64 ELF entry with the matching Limine bootloader, then verify the hand-off under QEMU.
 2. Bring up page tables, exception/interrupt handling, timers and early console.
-3. Integrate the selected Mach source with XIUL platform and VM contracts.
-4. Start Mach task/thread, scheduler and IPC services from the XIUL boot path.
-5. Complete the XIUL device ownership and I/O stream layer; the Linux netdev bridge now routes driver ingress/egress through BSD networking and NKE packet hooks.
+3. Integrate the selected Mach source with XUL platform and VM contracts.
+4. Start Mach task/thread, scheduler and IPC services from the XUL boot path.
+5. Complete the XUL device ownership and I/O stream layer; the Linux netdev bridge now routes driver ingress/egress through BSD networking and NKE packet hooks.
 6. Implement Linux driver compatibility primitives and port one real driver per bus class.
 7. Connect Linux network drivers to BSD networking.
 8. Adapt BSD networking and VFS/filesystem implementations.
@@ -95,4 +95,9 @@ This is the logical ownership model. It does not claim that upstream code is alr
 
 ## Current implementation status
 
-See [INTEGRATION-STATUS.md](INTEGRATION-STATUS.md). A host test or relocatable object build does not establish that XIUL is a bootable kernel. Do not call XIUL complete until the architecture entry, Mach runtime, Linux driver environment, BSD subsystems and end-to-end boot tests work together.
+See [INTEGRATION-STATUS.md](INTEGRATION-STATUS.md). A host test or relocatable object build does not establish that XUL is a bootable kernel. Do not call XUL complete until the architecture entry, Mach runtime, Linux driver environment, BSD subsystems and end-to-end boot tests work together.
+
+
+## Naming
+
+The kernel is named **XUL**. Existing `xiul` directory and C identifier spellings are compatibility details retained until the source-tree and ABI migration can be performed atomically.
