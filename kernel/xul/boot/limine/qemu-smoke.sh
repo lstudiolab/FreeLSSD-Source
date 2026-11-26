@@ -35,6 +35,7 @@ require_log() {
 require_log "XUL: core bootstrap completed"
 require_log "XUL: physical memory allocator online; total_pages="
 require_log "XUL: PCI devices enumerated="
-require_log "XUL: runtime services are not yet online; halting safely"
+require_log "XUL: timer configured; entering interrupt-driven idle loop"
+require_log "XUL: PIT timer interrupt received"
 
 echo "XUL x86_64 Limine/QEMU early-bootstrap smoke test: PASS"
