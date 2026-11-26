@@ -13,6 +13,30 @@
 static xul_kernel_context_t kernel_context;
 static unsigned int kernel_started;
 
+static int boot_contract_valid(const xul_boot_info_t *boot_info)
+{
+    uint64_t map_bytes;
+
+    if (boot_info == 0 ||
+        boot_info->magic != XUL_BOOT_INFO_MAGIC ||
+        boot_info->version != XUL_BOOT_INFO_VERSION ||
+        boot_info->structure_size < sizeof(*boot_info) ||
+        boot_info->memory_map_entries == 0 ||
+        boot_info->memory_map_entries > (uint64_t)SIZE_MAX ||
+        boot_info->memory_map_physical == 0 ||
+        boot_info->memory_map_virtual == 0 ||
+        (boot_info->memory_map_physical % _Alignof(xul_memory_region_t)) != 0 ||
+        (boot_info->memory_map_virtual % _Alignof(xul_memory_region_t)) != 0 ||
+        boot_info->memory_map_entries >
+            UINT64_MAX / sizeof(xul_memory_region_t)) {
+        return 0;
+    }
+
+    map_bytes = boot_info->memory_map_entries * sizeof(xul_memory_region_t);
+    return boot_info->memory_map_physical <= UINT64_MAX - map_bytes &&
+           boot_info->memory_map_virtual <= UINT64_MAX - map_bytes;
+}
+
 static xul_status_t platform_subsystem_init(xul_kernel_context_t *context)
 {
     xul_status_t status = xul_platform_initialize(&context->boot_info);
@@ -63,12 +87,8 @@ static const xul_subsystem_descriptor_t pci_subsystem = {
 xul_status_t xul_kernel_boot(const xul_boot_info_t *boot_info)
 {
     xul_status_t status;
-    if (boot_info == 0 || kernel_started ||
-        boot_info->magic != XUL_BOOT_INFO_MAGIC ||
-        boot_info->version != XUL_BOOT_INFO_VERSION ||
-        boot_info->structure_size < sizeof(*boot_info) ||
-        boot_info->memory_map_entries == 0 ||
-        boot_info->memory_map_virtual == 0) return XUL_E_INVALID;
+    if (kernel_started || !boot_contract_valid(boot_info))
+        return XUL_E_INVALID;
     kernel_context.boot_info = *boot_info;
     kernel_context.pci_devices = 0;
     status = xul_subsystem_register(&platform_subsystem);
