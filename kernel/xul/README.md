@@ -32,6 +32,12 @@ A device can use a Mach-native driver or a Linux driver. XUL's device framework 
 
 The complete XNU source tree is excluded. Only selected Mach `osfmk/` source belongs in `mach/`. Do not import XNU's BSD, I/O Kit, libkern, libsa, libsyscall or unrelated platform/build code.
 
+## Native bootloader
+
+FreeLSSD's planned native bootloader is **fBoot**, maintained in the repository-level `fboot/` directory. fBoot is intended to own UEFI boot policy, image validation/loading, memory-map normalization, architecture setup and the hand-off to XUL. It is not a Limine rebrand and does not contain Apple's proprietary boot code.
+
+The initial fBoot foundation now includes a versioned hand-off design, ELF64 load-image validation (including architecture, bounds, segment overlap, W^X and executable-entry checks), host tests and a dedicated CI workflow. It does not yet contain a complete UEFI application, page-table transition or a verified XUL boot path. Limine remains the temporary boot path until fBoot can pass equivalent firmware/QEMU tests on x86_64 and AArch64.
+
 ## Build and test
 
 ```sh
