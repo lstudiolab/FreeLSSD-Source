@@ -15,6 +15,7 @@ ARM64_CFLAGS = $(FREESTANDING_CFLAGS) -mgeneral-regs-only
 
 XIUL_COMMON_SOURCES = \
 	core/subsystem.c core/device.c core/platform.c core/kernel.c core/memory.c core/runtime.c core/entry.c core/exception.c core/pci.c \
+	boot/limine/entry.c boot/limine/requests.c \
 	io/stream.c compat/linux/pci.c compat/linux/net.c \
 	bsd/net/net.c bsd/vfs/vfs.c bsd/posix/syscall.c bsd/posix/fd.c bsd/nke/nke.c
 XIUL_X86_64_SOURCES = $(XIUL_COMMON_SOURCES) platform/x86_64/platform.c platform/x86_64/pci.c platform/x86_64/exception.c
@@ -132,7 +133,7 @@ arch-build: x86_64-build arm64-build
 
 source-audit:
 	@set -eu; \
-	for path in mach linux freebsd core include/xiul io compat/linux bsd/net bsd/vfs bsd/posix bsd/nke platform/x86_64 platform/arm64 boot/x86_64 boot/arm64 tests; do \
+	for path in mach linux freebsd core include/xiul io compat/linux bsd/net bsd/vfs bsd/posix bsd/nke platform/x86_64 platform/arm64 boot/x86_64 boot/arm64 boot/limine tests; do \
 		test -d "$(CURDIR)/$$path" || { echo "missing XIUL source root: $$path"; exit 1; }; \
 	done
 	@test -f xiul.toml
@@ -140,6 +141,10 @@ source-audit:
 	@test -f ARCHITECTURE.md
 	@test -f UPSTREAM-SOURCES.txt
 	@test -f boot/README.md
+	@test -f boot/limine/limine.conf
+	@test -f boot/limine/entry.c
+	@test -f boot/limine/requests.c
+	@test -f include/xiul/limine.h
 	@test -f include/xiul/linux_net.h
 	@test -f compat/linux/net.c
 	@test -f tests/test_linux_net.c
