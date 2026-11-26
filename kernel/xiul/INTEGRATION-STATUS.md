@@ -40,7 +40,7 @@ A physical device may be owned by one Mach-native or Linux driver at a time. Lin
 
 ## CI coverage
 
-The XIUL GitHub Actions workflow runs source-layout audits and host-side tests, then compiles and links XIUL-owned freestanding ELF images for x86_64 and AArch64 and publishes them as workflow artifacts. The latest verified run completed successfully on both targets. Host tests now include the bootstrap physical-page allocator and kernel startup requires a mapped boot memory map (ABI version 2). This validates the current XIUL-owned build only; it does not validate imported upstream kernel integration or bootability.
+The XIUL GitHub Actions workflow runs source-layout audits and host-side tests, compiles and links XIUL-owned freestanding ELF images for x86_64 and AArch64, packages Limine ISOs for both targets, and runs an x86_64 QEMU boot smoke test. These new steps have been added to CI but their first run has not yet been verified in this session. Host tests include the bootstrap physical-page allocator, Linux netdev-to-BSD networking and NKE packet filtering. This validates XIUL-owned integration only; it does not validate imported upstream Mach, Linux driver or FreeBSD stack integration.
 
 It does not:
 - build a final bootable kernel image;
@@ -56,7 +56,7 @@ It does not:
 3. Audit selected Mach source dependencies and connect Mach VM, scheduler, task/thread and IPC bootstrap to XIUL.
 4. Complete device resource ownership, MMIO mapping, IRQ routing, DMA and I/O stream integration.
 5. Implement Linux driver compatibility APIs in dependency-driven layers and build/run an initial real PCI driver.
-6. Connect Linux network drivers to BSD packet buffers and adapt a real BSD networking path.
+6. Port and run a real upstream Linux network driver through the new netdev bridge, then adapt FreeBSD mbuf, sockets, routing and protocol code.
 7. Adapt FreeBSD VFS/vnode/buffer/page-cache contracts and integrate an initial filesystem.
 8. Complete process creation, user-memory validation, POSIX syscall ABI, file descriptors and signals.
 9. Implement NKE ABI versioning, lifetime tracking, synchronization and safe unload.
