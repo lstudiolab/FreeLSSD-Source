@@ -1,0 +1,28 @@
+# This file has been modified by L,Studio.
+# Copyright (c) 2026 L,Studio. All rights reserved.
+
+name: fBoot Loader CI
+
+on:
+  push:
+    paths:
+      - "fboot/**"
+      - ".github/workflows/fboot.yml"
+  pull_request:
+    paths:
+      - "fboot/**"
+      - ".github/workflows/fboot.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  host-tests:
+    name: fBoot format and loader contract tests
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Run ELF64 validation tests
+        run: make -C fboot test
