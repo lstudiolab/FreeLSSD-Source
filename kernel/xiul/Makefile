@@ -118,13 +118,13 @@ $(BUILD_DIR)/arm64/xiul-core.o: $(ARM64_OBJECTS)
 	$(LD_ARM64) -r $^ -o $@
 
 $(BUILD_DIR)/x86_64/xiul.elf: $(BUILD_DIR)/x86_64/entry.o $(BUILD_DIR)/x86_64/exceptions.o $(BUILD_DIR)/x86_64/xiul-core.o boot/x86_64/linker.ld
-	$(CC) -nostdlib -no-pie -Wl,--build-id=none -Wl,-T,boot/x86_64/linker.ld $(BUILD_DIR)/x86_64/entry.o $(BUILD_DIR)/x86_64/exceptions.o $(BUILD_DIR)/x86_64/xiul-core.o -o $@
+	$(CC) -nostdlib -static -no-pie -Wl,--build-id=none -Wl,-z,max-page-size=0x1000 -Wl,-z,noexecstack -Wl,-T,boot/x86_64/linker.ld $(BUILD_DIR)/x86_64/entry.o $(BUILD_DIR)/x86_64/exceptions.o $(BUILD_DIR)/x86_64/xiul-core.o -o $@
 
 x86_64-build: $(BUILD_DIR)/x86_64/xiul.elf
 	@echo "XIUL x86_64 ELF image link: PASS"
 
 $(BUILD_DIR)/arm64/xiul.elf: $(BUILD_DIR)/arm64/entry.o $(BUILD_DIR)/arm64/exceptions.o $(BUILD_DIR)/arm64/xiul-core.o boot/arm64/linker.ld
-	$(LD_ARM64) -T boot/arm64/linker.ld $(BUILD_DIR)/arm64/entry.o $(BUILD_DIR)/arm64/exceptions.o $(BUILD_DIR)/arm64/xiul-core.o -o $@
+	$(LD_ARM64) -static -z max-page-size=0x1000 -z noexecstack -T boot/arm64/linker.ld $(BUILD_DIR)/arm64/entry.o $(BUILD_DIR)/arm64/exceptions.o $(BUILD_DIR)/arm64/xiul-core.o -o $@
 
 arm64-build: $(BUILD_DIR)/arm64/xiul.elf
 	@echo "XIUL AArch64 ELF image link: PASS"
