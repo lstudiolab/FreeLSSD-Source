@@ -22,22 +22,22 @@ XUL is not three complete kernels concatenated together. It defines explicit int
 
 ## Source layout
 
-The XUL source and integration plan currently lives under `kernel/xiul/` to preserve existing build paths and upstream integration layout:
+The XUL source and integration plan currently lives under `kernel/xul/` to preserve existing build paths and upstream integration layout:
 
 - `mach/` — selected Mach `osfmk/` source; the complete XNU tree is excluded.
 - `linux/` — Linux kernel source used as a source pool for selected drivers.
 - `freebsd/` — FreeBSD source used as a source pool for selected networking and filesystem components.
-- `core/`, `include/xiul/`, `io/` — XUL-owned kernel contracts and integration code.
+- `core/`, `include/xul/`, `io/` — XUL-owned kernel contracts and integration code.
 - `compat/linux/` — Linux driver compatibility layer.
 - `bsd/net/`, `bsd/vfs/`, `bsd/posix/`, `bsd/nke/` — BSD service adapters and XUL-owned ABI surfaces.
 
-Read [the XUL architecture](kernel/xiul/ARCHITECTURE.md) and [the XUL integration guide](kernel/xiul/README.md) before changing kernel source.
+Read [the XUL architecture](kernel/xul/ARCHITECTURE.md) and [the XUL integration guide](kernel/xul/README.md) before changing kernel source.
 
 ## XUL development checks
 
 ```sh
-make -C kernel/xiul source-audit
-make -C kernel/xiul test
+make -C kernel/xul source-audit
+make -C kernel/xul test
 ```
 
 GitHub Actions runs the host tests, links XUL-owned x86_64 and AArch64 ELF images, packages Limine bootable ISOs for both architectures, and smoke-boots the x86_64 ISO in QEMU. The host tests cover the XUL subsystem lifecycle manager, I/O stream primitive, device/driver registry, Linux netdev-to-BSD networking bridge and NKE packet filtering. The ISO packaging uses an external, pinned Limine bootloader; the smoke test does not prove that imported upstream Mach, Linux drivers or FreeBSD subsystems are integrated. The Mach platform port, Linux driver compatibility APIs, BSD networking/filesystem adapters, POSIX/NKE implementations and end-to-end hardware tests remain integration work.

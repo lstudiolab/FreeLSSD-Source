@@ -8,7 +8,7 @@ root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 cd "$root"
 
 fail() {
-    printf 'XIUL source check: %s\n' "$1" >&2
+    printf 'XUL source check: %s\n' "$1" >&2
     exit 1
 }
 
@@ -23,5 +23,5 @@ done
 [ -d vendor/linux/drivers ] || fail "Linux driver source directory is missing"
 [ -d vendor/freebsd-src/sys ] || fail "FreeBSD kernel source directory is missing"
 
-printf '%s\n' "XIUL upstream source trees are present."
-printf '%s\n' "This check validates source availability only; it does not claim that XIUL builds or boots."
+printf '%s\n' "XUL upstream source trees are present."
+printf '%s\n' "This check validates source availability only; it does not claim that XUL builds or boots."

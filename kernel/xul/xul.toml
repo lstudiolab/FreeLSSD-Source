@@ -1,0 +1,65 @@
+# This file has been modified by L,Studio.
+# Copyright (c) 2026 L,Studio. All rights reserved.
+
+# XUL source and integration manifest.
+name = "XUL"
+version = "0.2.0"
+architecture = "mach-bsd-linux-driver-environment"
+status = "integration-in-progress"
+
+[mach]
+path = "mach"
+upstream = "lstudiolab/darwin-xnu"
+upstream_subdirectory = "osfmk"
+role = "microkernel-foundation"
+include_complete_xnu = false
+owns_scheduling = true
+owns_ipc = true
+owns_vm_primitives = true
+owns_io_streams = true
+supports_native_drivers = true
+
+[linux]
+path = "linux"
+upstream = "lstudiolab/linux"
+role = "linux-driver-environment"
+preserve_driver_source = true
+requires_kernel_api_compatibility = true
+owns_hardware_access_through_xul_device_framework = true
+provides_stela_userspace = false
+provides_bsd_network_stack = false
+provides_bsd_filesystems = false
+
+[bsd]
+path = "freebsd"
+upstream = "lstudiolab/freebsd-src"
+role = "bsd-kernel-functionality"
+owns_networking = true
+owns_filesystems = true
+owns_posix_syscall_semantics = true
+owns_unix_kernel_functionality = true
+
+[xul]
+core = "core"
+headers = "include/xul"
+io = "io"
+linux_compat = "compat/linux"
+bsd_network = "bsd/net"
+bsd_vfs = "bsd/vfs"
+posix = "bsd/posix"
+nke = "bsd/nke"
+platform = "platform"
+
+[freelssd]
+user_space_owner = "L,Studio"
+gui = "FreeLSSD UI"
+native_api = "FreeLSSD API"
+compatibility_apis = ["BSD", "POSIX", "Classic", "QuickTime"]
+
+[interfaces]
+single_device_owner = true
+linux_driver_source_stays_upstream = true
+mach_native_drivers_supported = true
+bsd_owns_networking_and_filesystems = true
+bsd_posix_is_exposed_to_user_space = true
+io_streams_are_xul_owned = true
