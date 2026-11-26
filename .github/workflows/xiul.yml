@@ -1,25 +1,25 @@
 # This file has been modified by L,Studio.
 # Copyright (c) 2026 L,Studio. All rights reserved.
 
-name: XIUL Kernel CI
+name: XUL Kernel CI
 
 on:
   push:
     paths:
-      - "kernel/xiul/**"
-      - ".github/workflows/xiul.yml"
+      - "kernel/xul/**"
+      - ".github/workflows/xul.yml"
   pull_request:
     paths:
-      - "kernel/xiul/**"
-      - ".github/workflows/xiul.yml"
+      - "kernel/xul/**"
+      - ".github/workflows/xul.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  xiul:
-    name: XIUL tests and architecture links
+  xul:
+    name: XUL tests and architecture links
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -30,26 +30,26 @@ jobs:
           sudo apt-get update
           sudo apt-get install --yes gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu xorriso qemu-system-x86
       - name: Audit source layout
-        run: make -C kernel/xiul source-audit
+        run: make -C kernel/xul source-audit
       - name: Run host tests
-        run: make -C kernel/xiul test
+        run: make -C kernel/xul test
       - name: Build x86_64 ELF
-        run: make -C kernel/xiul x86_64-build
+        run: make -C kernel/xul x86_64-build
       - name: Build AArch64 ELF
-        run: make -C kernel/xiul arm64-build CC_ARM64=aarch64-linux-gnu-gcc LD_ARM64=aarch64-linux-gnu-ld
+        run: make -C kernel/xul arm64-build CC_ARM64=aarch64-linux-gnu-gcc LD_ARM64=aarch64-linux-gnu-ld
       - name: Build x86_64 bootable ISO
-        run: make -C kernel/xiul limine-image-x86_64
+        run: make -C kernel/xul limine-image-x86_64
       - name: Build AArch64 bootable ISO
-        run: make -C kernel/xiul limine-image-arm64 CC_ARM64=aarch64-linux-gnu-gcc LD_ARM64=aarch64-linux-gnu-ld
+        run: make -C kernel/xul limine-image-arm64 CC_ARM64=aarch64-linux-gnu-gcc LD_ARM64=aarch64-linux-gnu-ld
       - name: Smoke boot x86_64 ISO in QEMU
-        run: sh kernel/xiul/boot/limine/qemu-smoke.sh kernel/xiul/.build/xiul-x86_64.iso kernel/xiul/.build/xiul-qemu-smoke.log
+        run: sh kernel/xul/boot/limine/qemu-smoke.sh kernel/xul/.build/xul-x86_64.iso kernel/xul/.build/xul-qemu-smoke.log
       - name: Publish kernel images
         uses: actions/upload-artifact@v4
         with:
-          name: xiul-elf-images
+          name: xul-elf-images
           path: |
-            kernel/xiul/.build/x86_64/xiul.elf
-            kernel/xiul/.build/arm64/xiul.elf
-            kernel/xiul/.build/xiul-x86_64.iso
-            kernel/xiul/.build/xiul-arm64.iso
+            kernel/xul/.build/x86_64/xul.elf
+            kernel/xul/.build/arm64/xul.elf
+            kernel/xul/.build/xul-x86_64.iso
+            kernel/xul/.build/xul-arm64.iso
           if-no-files-found: error
