@@ -30,6 +30,8 @@ uint64_t xul_platform_cpu_id(void);
 xul_irq_state_t xul_platform_irq_save_disable(void);
 void xul_platform_irq_restore(xul_irq_state_t state);
 void xul_platform_cpu_relax(void);
+void xul_platform_irq_eoi(uint64_t vector);
+_Noreturn void xul_platform_idle(void);
 _Noreturn void xul_platform_halt(void);
 
 #ifdef __cplusplus
