@@ -1,10 +1,10 @@
 /*
  * This file has been modified by L,Studio.
- *
  * Copyright (c) 2026 L,Studio. All rights reserved.
  */
 
 #include "xiul/net.h"
+#include "xiul/nke.h"
 
 static xiul_netif_t *interfaces[XIUL_NETIF_MAX];
 static size_t interface_count;
@@ -27,6 +27,28 @@ static int is_registered(const xiul_netif_t *interface)
     for (i = 0; i < interface_count; ++i)
         if (interfaces[i] == interface) return 1;
     return 0;
+}
+
+/*
+ * NKE is on the actual BSD network ingress/egress path. Hooks receive a
+ * temporary packet descriptor; edits are copied back only when the packet
+ * is accepted. A hook may therefore rewrite payload, length or protocol.
+ */
+static xiul_status_t apply_nke(xiul_net_packet_t *packet)
+{
+    xiul_nke_packet_t extension_packet;
+    xiul_nke_action_t action;
+    extension_packet.data = packet->data;
+    extension_packet.length = packet->length;
+    extension_packet.protocol = packet->protocol;
+    action = xiul_nke_process(&extension_packet);
+    if (action == XIUL_NKE_DROP) return XIUL_E_DROPPED;
+    if (extension_packet.data == 0 || extension_packet.length == 0)
+        return XIUL_E_INVALID;
+    packet->data = extension_packet.data;
+    packet->length = extension_packet.length;
+    packet->protocol = extension_packet.protocol;
+    return XIUL_OK;
 }
 
 xiul_status_t xiul_net_set_input_handler(xiul_net_input_fn handler)
@@ -104,18 +126,24 @@ xiul_status_t xiul_netif_unregister(xiul_netif_t *interface)
 
 xiul_status_t xiul_net_receive(xiul_netif_t *interface, xiul_net_packet_t *packet)
 {
+    xiul_status_t status;
     if (interface == 0 || packet == 0 || packet->data == 0 || packet->length == 0)
         return XIUL_E_INVALID;
     if (!is_registered(interface)) return XIUL_E_NOT_FOUND;
+    status = apply_nke(packet);
+    if (status != XIUL_OK) return status;
     if (input_handler != 0) return input_handler(interface, packet);
     return xiul_net_protocol_dispatch(interface, packet);
 }
 
 xiul_status_t xiul_net_transmit(xiul_netif_t *interface, xiul_net_packet_t *packet)
 {
+    xiul_status_t status;
     if (interface == 0 || packet == 0 || packet->data == 0 || packet->length == 0)
         return XIUL_E_INVALID;
     if (!is_registered(interface)) return XIUL_E_NOT_FOUND;
+    status = apply_nke(packet);
+    if (status != XIUL_OK) return status;
     if (packet->length > interface->mtu) return XIUL_E_INVALID;
     return interface->transmit(interface, packet);
 }
