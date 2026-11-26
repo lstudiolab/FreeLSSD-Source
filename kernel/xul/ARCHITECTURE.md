@@ -83,7 +83,7 @@ This is the logical ownership model. It does not claim that upstream code is alr
 ## Build order
 
 1. Package the Limine-compatible x86_64/AArch64 ELF entry with the matching Limine bootloader, then verify the hand-off under QEMU.
-2. Bring up page tables, exception/interrupt handling, timers and early console.
+2. Bring up page tables, full exception/interrupt handling, APIC/GIC routing, architected timers and early console. The current x86_64 bootstrap has a temporary 8259/PIT IRQ0 path and interrupt-driven HLT idle loop.
 3. Integrate the selected Mach source with XUL platform and VM contracts.
 4. Start Mach task/thread, scheduler and IPC services from the XUL boot path.
 5. Complete the XUL device ownership and I/O stream layer; the Linux netdev bridge now routes driver ingress/egress through BSD networking and NKE packet hooks.
