@@ -40,7 +40,7 @@ make -C kernel/xiul source-audit
 make -C kernel/xiul test
 ```
 
-GitHub Actions runs the host tests and links XIUL-owned x86_64 and AArch64 ELF images. The host tests cover the XIUL subsystem lifecycle manager, I/O stream primitive and device/driver registry. The ELF images still require a compatible loader and do not build the imported upstream kernels or prove that XIUL boots. The Mach platform port, Linux driver compatibility APIs, BSD networking/filesystem adapters, POSIX/NKE implementations and end-to-end hardware tests remain integration work.
+GitHub Actions runs the host tests, links XIUL-owned x86_64 and AArch64 ELF images, packages Limine bootable ISOs for both architectures, and smoke-boots the x86_64 ISO in QEMU. The host tests cover the XIUL subsystem lifecycle manager, I/O stream primitive, device/driver registry, Linux netdev-to-BSD networking bridge and NKE packet filtering. The ISO packaging uses an external, pinned Limine bootloader; the smoke test does not prove that imported upstream Mach, Linux drivers or FreeBSD subsystems are integrated. The Mach platform port, Linux driver compatibility APIs, BSD networking/filesystem adapters, POSIX/NKE implementations and end-to-end hardware tests remain integration work.
 
 ## Licensing
 
