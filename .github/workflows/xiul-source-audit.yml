@@ -1,7 +1,7 @@
 # This file has been modified by L,Studio.
 # Copyright (c) 2026 L,Studio. All rights reserved.
 
-name: XIUL source audit
+name: XUL source audit
 
 on:
   workflow_dispatch:
@@ -19,9 +19,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --yes gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
-      - name: Run XIUL source audit
-        run: make -C kernel/xiul source-audit
-      - name: Build and test XIUL core
-        run: make -C kernel/xiul test
-      - name: Freestanding-build and relocatably link XIUL core for x86_64 and AArch64
-        run: make -C kernel/xiul arch-build
+      - name: Run XUL source audit
+        run: make -C kernel/xul source-audit
+      - name: Build and test XUL core
+        run: make -C kernel/xul test
+      - name: Freestanding-build and relocatably link XUL core for x86_64 and AArch64
+        run: make -C kernel/xul arch-build
