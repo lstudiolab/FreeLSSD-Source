@@ -56,14 +56,14 @@ if [ "$ARCH" = "x86_64" ]; then
     xorriso -as mkisofs -R -r -J -b boot/limine/limine-bios-cd.bin \
         -no-emul-boot -boot-load-size 4 -boot-info-table -hfsplus \
         -apm-block-size 2048 --efi-boot boot/limine/limine-uefi-cd.bin \
-        -efi-boot-part -efi-boot-image --protective-msdos-label \
+        -efi-boot-part --efi-boot-image --protective-msdos-label \
         "$ISO_ROOT" -o "$IMAGE"
     "$LIMINE_DIR/limine" bios-install "$IMAGE"
 else
     cp "$LIMINE_DIR/BOOTAA64.EFI" "$ISO_ROOT/EFI/BOOT/BOOTAA64.EFI"
     xorriso -as mkisofs -R -r -J -hfsplus -apm-block-size 2048 \
         --efi-boot boot/limine/limine-uefi-cd.bin -efi-boot-part \
-        -efi-boot-image --protective-msdos-label "$ISO_ROOT" -o "$IMAGE"
+        --efi-boot-image --protective-msdos-label "$ISO_ROOT" -o "$IMAGE"
 fi
 
 echo "XUL $ARCH Limine ISO: $IMAGE"
