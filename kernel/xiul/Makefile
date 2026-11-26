@@ -23,7 +23,7 @@ XIUL_ARM64_SOURCES = $(XIUL_COMMON_SOURCES) platform/arm64/platform.c platform/a
 X86_64_OBJECTS = $(patsubst %.c,$(BUILD_DIR)/x86_64/%.o,$(XIUL_X86_64_SOURCES))
 ARM64_OBJECTS = $(patsubst %.c,$(BUILD_DIR)/arm64/%.o,$(XIUL_ARM64_SOURCES))
 
-.PHONY: all test source-audit arch-build x86_64-build arm64-build clean
+.PHONY: all test source-audit arch-build x86_64-build arm64-build limine-image-x86_64 limine-image-arm64 boot-images clean
 all: test arch-build
 
 $(BUILD_DIR):
@@ -131,6 +131,14 @@ arm64-build: $(BUILD_DIR)/arm64/xiul.elf
 
 arch-build: x86_64-build arm64-build
 
+limine-image-x86_64: x86_64-build
+	sh boot/limine/build-image.sh x86_64
+
+limine-image-arm64: arm64-build
+	sh boot/limine/build-image.sh arm64
+
+boot-images: limine-image-x86_64 limine-image-arm64
+
 source-audit:
 	@set -eu; \
 	for path in mach linux freebsd core include/xiul io compat/linux bsd/net bsd/vfs bsd/posix bsd/nke platform/x86_64 platform/arm64 boot/x86_64 boot/arm64 boot/limine tests; do \
@@ -142,6 +150,7 @@ source-audit:
 	@test -f UPSTREAM-SOURCES.txt
 	@test -f boot/README.md
 	@test -f boot/limine/limine.conf
+	@test -f boot/limine/build-image.sh
 	@test -f boot/limine/entry.c
 	@test -f boot/limine/requests.c
 	@test -f include/xiul/limine.h
