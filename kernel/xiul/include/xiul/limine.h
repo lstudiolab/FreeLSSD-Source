@@ -4,6 +4,11 @@
  *
  * Limine boot protocol declarations, derived from the 0BSD-licensed
  * Limine protocol specification and limine.h.
+ *
+ * Copyright (C) 2022-2026 Mintsuki and contributors.
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted.
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES.
  * SPDX-License-Identifier: 0BSD
  */
 
