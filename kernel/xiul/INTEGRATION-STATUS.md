@@ -36,7 +36,7 @@ A physical device may be owned by one Mach-native or Linux driver at a time. Lin
 | BSD VFS | Mount/open/read/write/close and vnode contracts | FreeBSD VFS/vnode/filesystem sources are not adapted or linked |
 | POSIX | Syscall dispatch and per-process file-descriptor table connected to VFS | No complete process model, user-memory boundary, signal model or ABI |
 | NKE | Priority-ordered packet hooks are now invoked on BSD network ingress and egress; accepted hook edits are propagated and drops return `XIUL_E_DROPPED` | No loadable module ABI, hook lifetime protection, concurrent registration synchronization or safe unload |
-| x86_64 / AArch64 | Loader hand-off entry stubs, bootstrap stacks, linker scripts, early console, CPU/IRQ primitives, x86_64 256-entry IDT with vector/error diagnostics, AArch64 VBAR vectors at EL1 or EL2 with vector-slot/ESR diagnostics and PCI config access; Makefile links XIUL-owned ELF images | Loader required; exception handlers remain diagnostic fail-stop; no page-table/VM bootstrap, APIC/GIC routing, timer, SMP or QEMU boot verification |
+| x86_64 / AArch64 | Limine protocol requests and entry adapter for HHDM, memory map, executable address and 64 KiB stack; Limine response conversion to XIUL boot ABI; legacy hand-off stubs; x86_64 256-entry IDT and AArch64 VBAR vectors with diagnostics | Limine bootloader/media still external; no QEMU boot verification, full VM bootstrap, APIC/GIC routing, timer or SMP |
 
 ## CI coverage
 
@@ -51,7 +51,7 @@ It does not:
 
 ## Remaining kernel milestones
 
-1. Implement a real UEFI/BIOS/Multiboot loader for each target; current entry stubs only consume the documented XIUL hand-off ABI and are not standalone bootloaders.
+1. Package the Limine-loadable x86_64/AArch64 ELF images with the architecture-matching Limine bootloader and verify both paths under QEMU; the bootloader binaries and ISO/disk-image targets are not yet included.
 2. Establish page tables and a virtual-memory/pmap layer on top of the bootstrap physical allocator, then add interrupt controllers, timers, firmware discovery and SMP bring-up. Exception vectors are installed but currently halt on every exception.
 3. Audit selected Mach source dependencies and connect Mach VM, scheduler, task/thread and IPC bootstrap to XIUL.
 4. Complete device resource ownership, MMIO mapping, IRQ routing, DMA and I/O stream integration.
