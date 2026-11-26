@@ -1,7 +1,7 @@
 # This file has been modified by L,Studio.
 # Copyright (c) 2026 L,Studio. All rights reserved.
 
-name: Import XIUL upstream source
+name: Import XUL upstream source
 
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: xiul-source-import
+  group: xul-source-import
   cancel-in-progress: false
 
 jobs:
@@ -23,5 +23,5 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Import forked source trees into kernel/xiul
-        run: bash scripts/import-xiul-sources.sh
+      - name: Import forked source trees into kernel/xul
+        run: bash scripts/import-xul-sources.sh
