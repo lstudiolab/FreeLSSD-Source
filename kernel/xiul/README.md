@@ -38,6 +38,8 @@ The complete XNU source tree is excluded. Only selected Mach `osfmk/` source bel
 make -C kernel/xiul source-audit
 make -C kernel/xiul test
 make -C kernel/xiul arch-build
+make -C kernel/xiul limine-image-x86_64
+make -C kernel/xiul limine-image-arm64 CC_ARM64=aarch64-linux-gnu-gcc LD_ARM64=aarch64-linux-gnu-ld
 ```
 
 These commands validate XIUL-owned host tests (including physical-page allocation and Linux-netdev/BSD-network integration) and link freestanding ELF images for x86_64 and AArch64. Both images now include a Limine protocol adapter that constructs the version-2 `xiul_boot_info_t` hand-off from Limine's memory-map and executable-address responses. The Limine bootloader remains external but is downloaded at a pinned version for `limine-image-x86_64` and `limine-image-arm64`. The x86_64 ISO has a QEMU smoke test in CI; AArch64 runtime boot is not yet verified. The commands do not compile upstream Mach, Linux drivers or FreeBSD networking/filesystems against XIUL. See `boot/README.md` for the Limine and legacy loader contracts.
