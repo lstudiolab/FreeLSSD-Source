@@ -31,8 +31,8 @@ A physical device may be owned by one Mach-native or Linux driver at a time. Lin
 | Physical memory | EFI conventional-memory map ingestion, page alignment, extent coalescing, contiguous page allocation/release and accounting | Bootstrap allocator only; no page tables, pmap, virtual allocator, DMA zones or SMP-safe locking |
 | Freestanding runtime | XIUL-owned `memset`, `memcpy`, `memmove` and `memcmp` primitives required by kernel objects | Minimal C runtime only; no full compiler runtime or libc |
 | PCI | Generic enumeration, BAR sizing and x86_64 CF8/CFC / AArch64 ECAM configuration backends | Platform MMIO mapping, IRQ routing and DMA are incomplete |
-| Linux driver bridge | Narrow Linux-style PCI registration adapter | No general Linux kernel API environment; no upstream Linux driver has been built or run |
-| BSD networking | Network-interface and protocol-handler dispatch boundary | FreeBSD mbuf, sockets, routing and protocol stack are not adapted or linked |
+| Linux driver bridge | Narrow Linux-style PCI registration adapter plus a Linux `net_device`-style bridge that forwards TX to `ndo_start_xmit` and RX into BSD networking | No general Linux kernel API environment; no upstream Linux driver has been built or run |
+| BSD networking | Network-interface and protocol dispatch; Linux netdev ingress/egress bridge; NKE hooks run on both packet directions and can rewrite or drop packets | FreeBSD mbuf, sockets, routing and protocol stack are not adapted or linked |
 | BSD VFS | Mount/open/read/write/close and vnode contracts | FreeBSD VFS/vnode/filesystem sources are not adapted or linked |
 | POSIX | Syscall dispatch and per-process file-descriptor table connected to VFS | No complete process model, user-memory boundary, signal model or ABI |
 | NKE | Priority-ordered packet hooks are now invoked on BSD network ingress and egress; accepted hook edits are propagated and drops return `XIUL_E_DROPPED` | No loadable module ABI, hook lifetime protection, concurrent registration synchronization or safe unload |
