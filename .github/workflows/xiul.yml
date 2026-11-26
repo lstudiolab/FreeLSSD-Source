@@ -28,7 +28,7 @@ jobs:
       - name: Install AArch64 cross toolchain
         run: |
           sudo apt-get update
-          sudo apt-get install --yes gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
+          sudo apt-get install --yes gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu xorriso qemu-system-x86
       - name: Audit source layout
         run: make -C kernel/xiul source-audit
       - name: Run host tests
@@ -37,6 +37,12 @@ jobs:
         run: make -C kernel/xiul x86_64-build
       - name: Build AArch64 ELF
         run: make -C kernel/xiul arm64-build CC_ARM64=aarch64-linux-gnu-gcc LD_ARM64=aarch64-linux-gnu-ld
+      - name: Build x86_64 bootable ISO
+        run: make -C kernel/xiul limine-image-x86_64
+      - name: Build AArch64 bootable ISO
+        run: make -C kernel/xiul limine-image-arm64 CC_ARM64=aarch64-linux-gnu-gcc LD_ARM64=aarch64-linux-gnu-ld
+      - name: Smoke boot x86_64 ISO in QEMU
+        run: sh kernel/xiul/boot/limine/qemu-smoke.sh kernel/xiul/.build/xiul-x86_64.iso kernel/xiul/.build/xiul-qemu-smoke.log
       - name: Publish kernel images
         uses: actions/upload-artifact@v4
         with:
@@ -44,4 +50,6 @@ jobs:
           path: |
             kernel/xiul/.build/x86_64/xiul.elf
             kernel/xiul/.build/arm64/xiul.elf
+            kernel/xiul/.build/xiul-x86_64.iso
+            kernel/xiul/.build/xiul-arm64.iso
           if-no-files-found: error
