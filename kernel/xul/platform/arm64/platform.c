@@ -112,6 +112,16 @@ void xul_platform_irq_restore(xul_irq_state_t state)
     __asm__ volatile ("msr daif, %0" : : "r"(value) : "memory");
 }
 
+void xul_platform_irq_eoi(uint64_t vector)
+{
+    (void)vector;
+}
+
+_Noreturn void xul_platform_idle(void)
+{
+    for (;;) __asm__ volatile ("wfe" : : : "memory");
+}
+
 void xul_platform_cpu_relax(void)
 {
     __asm__ volatile ("yield" : : : "memory");
