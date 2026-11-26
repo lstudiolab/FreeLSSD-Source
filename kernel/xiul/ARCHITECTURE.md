@@ -82,11 +82,11 @@ This is the logical ownership model. It does not claim that upstream code is alr
 
 ## Build order
 
-1. Establish a real boot protocol and architecture entry for each supported target.
+1. Package the Limine-compatible x86_64/AArch64 ELF entry with the matching Limine bootloader, then verify the hand-off under QEMU.
 2. Bring up page tables, exception/interrupt handling, timers and early console.
 3. Integrate the selected Mach source with XIUL platform and VM contracts.
 4. Start Mach task/thread, scheduler and IPC services from the XIUL boot path.
-5. Complete the XIUL device ownership and I/O stream layer.
+5. Complete the XIUL device ownership and I/O stream layer; the Linux netdev bridge now routes driver ingress/egress through BSD networking and NKE packet hooks.
 6. Implement Linux driver compatibility primitives and port one real driver per bus class.
 7. Connect Linux network drivers to BSD networking.
 8. Adapt BSD networking and VFS/filesystem implementations.
