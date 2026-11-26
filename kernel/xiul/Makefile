@@ -140,6 +140,9 @@ source-audit:
 	@test -f ARCHITECTURE.md
 	@test -f UPSTREAM-SOURCES.txt
 	@test -f boot/README.md
+	@test -f include/xiul/linux_net.h
+	@test -f compat/linux/net.c
+	@test -f tests/test_linux_net.c
 	@test -f boot/x86_64/linker.ld
 	@test -f boot/arm64/linker.ld
 	@test -f boot/x86_64/exceptions.S
