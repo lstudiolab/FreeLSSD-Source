@@ -1,6 +1,5 @@
 /*
  * This file has been modified by L,Studio.
- *
  * Copyright (c) 2026 L,Studio. All rights reserved.
  */
 
@@ -23,7 +22,8 @@ enum {
     XIUL_E_CAPACITY = -8,
     XIUL_E_CYCLE = -9,
     XIUL_E_INIT = -10,
-    XIUL_E_BUSY = -11
+    XIUL_E_BUSY = -11,
+    XIUL_E_DROPPED = -12
 };
 
 #endif
