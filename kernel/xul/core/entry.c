@@ -42,8 +42,8 @@ _Noreturn void xul_kernel_entry(const xul_boot_info_t *boot_info)
         xul_platform_console_write("XUL: PCI devices enumerated=");
         write_unsigned((uint64_t)context->pci_devices);
         xul_platform_console_write("\n");
-        xul_platform_console_write(
-            "XUL: runtime services are not yet online; halting safely\n");
+        xul_platform_console_write("XUL: timer configured; entering interrupt-driven idle loop\n");
+        xul_platform_idle();
     } else {
         xul_platform_console_write("XUL: bootstrap failed; status=");
         write_unsigned((uint64_t)status);
