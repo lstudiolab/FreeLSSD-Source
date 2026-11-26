@@ -30,6 +30,20 @@ static inline uint8_t inb(uint16_t port)
 
 static unsigned int platform_initialized;
 
+static void legacy_pic_and_pit_initialize(void)
+{
+    uint16_t divisor = (uint16_t)(1193182u / 100u);
+    outb(0x20u, 0x11u); outb(0xa0u, 0x11u);
+    outb(0x21u, 0x20u); outb(0xa1u, 0x28u);
+    outb(0x21u, 0x04u); outb(0xa1u, 0x02u);
+    outb(0x21u, 0x01u); outb(0xa1u, 0x01u);
+    outb(0x21u, 0xfeu);
+    outb(0xa1u, 0xffu);
+    outb(0x43u, 0x36u);
+    outb(0x40u, (uint8_t)(divisor & 0xffu));
+    outb(0x40u, (uint8_t)(divisor >> 8));
+}
+
 static void serial_initialize(void)
 {
     outb(COM1 + UART_INTERRUPT_ENABLE, 0x00);
@@ -48,6 +62,7 @@ xul_status_t xul_arch_early_init(const xul_boot_info_t *boot_info)
     serial_initialize();
     status = xul_x86_64_exception_initialize();
     if (status != XUL_OK) return status;
+    legacy_pic_and_pit_initialize();
     xul_platform_console_write("XUL x86_64 platform initialized; IDT active\r\n");
     platform_initialized = 1;
     return XUL_OK;
@@ -101,6 +116,17 @@ void xul_platform_irq_restore(xul_irq_state_t state)
     } else {
         __asm__ volatile ("cli" : : : "memory");
     }
+}
+
+void xul_platform_irq_eoi(uint64_t vector)
+{
+    if (vector >= 40u && vector <= 47u) outb(0xa0u, 0x20u);
+    if (vector >= 32u && vector <= 47u) outb(0x20u, 0x20u);
+}
+
+_Noreturn void xul_platform_idle(void)
+{
+    for (;;) __asm__ volatile ("sti; hlt" : : : "memory");
 }
 
 void xul_platform_cpu_relax(void)
