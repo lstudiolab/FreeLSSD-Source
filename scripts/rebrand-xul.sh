@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # One-shot repository migration from XIUL to XUL.
 # Third-party Mach, Linux and FreeBSD source trees are deliberately left untouched.
+# Workflow files are updated separately through repository administration.
 set -euo pipefail
 
 if [[ -d kernel/xiul && ! -e kernel/xul ]]; then
@@ -15,25 +16,14 @@ if [[ -f kernel/xul/xiul.toml && ! -e kernel/xul/xul.toml ]]; then
   git mv kernel/xul/xiul.toml kernel/xul/xul.toml
 fi
 
-rename_if_present() {
-  local old_path="$1"
-  local new_path="$2"
-  if [[ -e "$old_path" && ! -e "$new_path" ]]; then
-    git mv "$old_path" "$new_path"
-  fi
-}
-
-rename_if_present .github/workflows/xiul.yml .github/workflows/xul.yml
-rename_if_present .github/workflows/xiul-source-audit.yml .github/workflows/xul-source-audit.yml
-rename_if_present .github/workflows/import-xiul-sources.yml .github/workflows/import-xul-sources.yml
-rename_if_present scripts/import-xiul-sources.sh scripts/import-xul-sources.sh
-
 # Rename XUL-owned identifiers, include paths, diagnostics, build variables and
-# documentation. Keep upstream source trees byte-for-byte unchanged.
+# documentation. Preserve the upstream Mach, Linux and FreeBSD source content.
+# CI workflows are excluded because GitHub requires a separate workflow scope.
 git grep -Ilz -e 'XIUL' -e 'xiul' -- . \
   ':!kernel/xul/mach/**' \
   ':!kernel/xul/linux/**' \
   ':!kernel/xul/freebsd/**' \
+  ':!.github/workflows/**' \
   ':!scripts/rebrand-xul.sh' |
   xargs -0 -r sed -i -e 's/XIUL/XUL/g' -e 's/xiul/xul/g'
 
