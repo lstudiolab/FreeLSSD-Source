@@ -40,14 +40,16 @@ A physical device may be owned by one Mach-native or Linux driver at a time. Lin
 
 ## CI coverage
 
-The XUL GitHub Actions workflow runs source-layout audits and host-side tests, compiles and links XUL-owned freestanding ELF images for x86_64 and AArch64, packages Limine ISOs for both targets, and runs an x86_64 QEMU boot smoke test that now requires delivery of a PIT timer interrupt. The timer-path CI result has not yet been verified in this session. Host tests include the bootstrap physical-page allocator, bounded Mach-style IPC ports, Linux netdev-to-BSD networking and NKE packet filtering. This validates XUL-owned integration only; it does not validate imported upstream Mach, Linux driver or FreeBSD stack integration.
+The XUL GitHub Actions workflow runs source-layout audits and host-side tests, compiles and links XUL-owned freestanding ELF images for x86_64 and AArch64, packages Limine bootable ISOs for both targets, and runs an x86_64 QEMU early-bootstrap smoke test. That smoke test requires the serial log to show the physical allocator, PCI enumeration, and a delivered PIT timer interrupt. Host tests include the bootstrap physical-page allocator, bounded Mach-style IPC ports and its boot lifecycle, Linux netdev-to-BSD networking and NKE packet filtering. The current IPC changes are committed on `main`; their CI run is still in progress and must pass before this milestone is verified.
 
-It does not:
-- build a final bootable kernel image;
+CI does not:
+- boot-test the AArch64 ISO;
 - compile the imported Mach `osfmk/` runtime;
-- compile upstream Linux drivers against a complete XUL Linux compatibility environment;
+- compile or execute an upstream Linux driver against a complete XUL Linux compatibility environment;
 - compile FreeBSD networking or filesystem code against XUL;
-- execute QEMU boot tests or physical-hardware tests.
+- validate physical hardware, SMP, storage, or full user-space execution.
+
+The x86_64 QEMU smoke test proves only early boot through the timer interrupt and expected idle loop. It is not evidence that the complete XUL kernel or FreeLSSD is operational.
 
 ## Remaining kernel milestones
 
