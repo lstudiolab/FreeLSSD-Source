@@ -5,7 +5,7 @@ Copyright (c) 2026 L,Studio. All rights reserved.
 
 # XUL Integration Status
 
-Last updated: 2026-11-26
+Last updated: 2026-11-27
 
 This status distinguishes imported source, XUL-owned tested code and upstream integration. An imported source directory is not proof that the code has been adapted, linked or executed.
 
@@ -26,7 +26,7 @@ A physical device may be owned by one Mach-native or Linux driver at a time. Lin
 | Area | XUL-owned implementation | Upstream integration / runtime status |
 |---|---|---|
 | Subsystem lifecycle | Dependency validation, cycle detection, phase-aware startup, reverse shutdown and failure rollback | Not connected to Mach bootstrap |
-| I/O streams | Bounded single-producer/single-consumer byte stream with partial nonblocking I/O and close semantics | Not yet connected to Mach IPC or real device drivers |
+| Mach IPC | Bounded, nonblocking message ports with single-owner receive, fixed queues, generation-tagged handles, stale-handle rejection and serialized concurrent access; initialized by the core boot lifecycle | Initial XUL-owned transport only; not the imported Mach IPC ABI, no task/thread integration or blocking wait semantics |\n| I/O streams | Bounded single-producer/single-consumer byte stream with partial nonblocking I/O and close semantics | Not yet connected to Mach IPC or real device drivers |
 | Device framework | Fixed-capacity device/driver registry, bus and ID matching, probe/bind and remove/unbind | No production hotplug serialization or full resource ownership |
 | Physical memory | EFI conventional-memory map ingestion, page alignment, extent coalescing, contiguous page allocation/release and accounting | Bootstrap allocator only; no page tables, pmap, virtual allocator, DMA zones or SMP-safe locking |
 | Freestanding runtime | XUL-owned `memset`, `memcpy`, `memmove` and `memcmp` primitives required by kernel objects | Minimal C runtime only; no full compiler runtime or libc |
@@ -40,7 +40,7 @@ A physical device may be owned by one Mach-native or Linux driver at a time. Lin
 
 ## CI coverage
 
-The XUL GitHub Actions workflow runs source-layout audits and host-side tests, compiles and links XUL-owned freestanding ELF images for x86_64 and AArch64, packages Limine ISOs for both targets, and runs an x86_64 QEMU boot smoke test that now requires delivery of a PIT timer interrupt. The timer-path CI result has not yet been verified in this session. Host tests include the bootstrap physical-page allocator, Linux netdev-to-BSD networking and NKE packet filtering. This validates XUL-owned integration only; it does not validate imported upstream Mach, Linux driver or FreeBSD stack integration.
+The XUL GitHub Actions workflow runs source-layout audits and host-side tests, compiles and links XUL-owned freestanding ELF images for x86_64 and AArch64, packages Limine ISOs for both targets, and runs an x86_64 QEMU boot smoke test that now requires delivery of a PIT timer interrupt. The timer-path CI result has not yet been verified in this session. Host tests include the bootstrap physical-page allocator, bounded Mach-style IPC ports, Linux netdev-to-BSD networking and NKE packet filtering. This validates XUL-owned integration only; it does not validate imported upstream Mach, Linux driver or FreeBSD stack integration.
 
 It does not:
 - build a final bootable kernel image;
@@ -53,7 +53,7 @@ It does not:
 
 1. Verify the new x86_64 Limine ISO/QEMU smoke test in CI, then add AArch64 QEMU runtime verification; disk-image packaging remains open.
 2. Establish page tables and a virtual-memory/pmap layer on top of the bootstrap physical allocator; replace the legacy PIC/PIT path with APIC and add firmware discovery, a scheduler-backed idle task and SMP bring-up. CPU exceptions remain fail-stop diagnostic handlers.
-3. Audit selected Mach source dependencies and connect Mach VM, scheduler, task/thread and IPC bootstrap to XUL.
+3. Audit selected Mach source dependencies; replace the initial XUL-owned IPC transport with the selected Mach IPC implementation and connect Mach VM, scheduler and task/thread bootstrap to XUL.
 4. Complete device resource ownership, MMIO mapping, IRQ routing, DMA and I/O stream integration.
 5. Implement Linux driver compatibility APIs in dependency-driven layers and build/run an initial real PCI driver.
 6. Port and run a real upstream Linux network driver through the new netdev bridge, then adapt FreeBSD mbuf, sockets, routing and protocol code.
