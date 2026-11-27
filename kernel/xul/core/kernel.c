@@ -9,6 +9,7 @@
 #include "xul/pci.h"
 #include "xul/subsystem.h"
 #include "xul/memory.h"
+#include "xul/ipc.h"
 
 static xul_kernel_context_t kernel_context;
 static unsigned int kernel_started;
@@ -36,6 +37,23 @@ static int boot_contract_valid(const xul_boot_info_t *boot_info)
     return boot_info->memory_map_physical <= UINT64_MAX - map_bytes &&
            boot_info->memory_map_virtual <= UINT64_MAX - map_bytes;
 }
+
+static xul_status_t mach_ipc_subsystem_init(xul_kernel_context_t *context)
+{
+    (void)context;
+    return xul_ipc_initialize();
+}
+
+static void mach_ipc_subsystem_shutdown(xul_kernel_context_t *context)
+{
+    (void)context;
+    xul_ipc_shutdown();
+}
+
+static const xul_subsystem_descriptor_t mach_ipc_subsystem = {
+    XUL_ABI_VERSION, "mach-ipc", XUL_PHASE_CORE,
+    0, 0, mach_ipc_subsystem_init, mach_ipc_subsystem_shutdown
+};
 
 static xul_status_t platform_subsystem_init(xul_kernel_context_t *context)
 {
@@ -91,6 +109,8 @@ xul_status_t xul_kernel_boot(const xul_boot_info_t *boot_info)
         return XUL_E_INVALID;
     kernel_context.boot_info = *boot_info;
     kernel_context.pci_devices = 0;
+    status = xul_subsystem_register(&mach_ipc_subsystem);
+    if (status != XUL_OK) return status;
     status = xul_subsystem_register(&platform_subsystem);
     if (status != XUL_OK) return status;
     status = xul_subsystem_register(&pci_subsystem);
