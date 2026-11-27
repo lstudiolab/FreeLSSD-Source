@@ -69,7 +69,7 @@ This is the logical ownership model. It does not claim that upstream code is alr
 9. Upstream source is source material, not proof of integration. Every port must have a dependency inventory, build result and runtime test.
 10. Preserve upstream copyright and license notices. Review per-file licensing before linking or distributing Mach-, Linux- or FreeBSD-derived code.
 
-## Required integration contracts
+## Initial Mach IPC transport\n\nXUL currently provides a bounded, nonblocking message-port transport in `core/ipc.c`. Ports have one receiving owner, fixed-capacity message queues and generation-tagged handles. Senders enqueue copied messages; only the owner can receive or destroy a port. The core boot lifecycle initializes and shuts down this service. This is an XUL-owned bootstrap primitive, not a claim that the imported Mach IPC subsystem has been compiled or that the full Mach port-rights, notification, memory-descriptor and blocking-wait semantics exist.\n\n## Required integration contracts
 
 - Boot and platform: boot protocol, CPU mode, firmware tables, memory map, early console and CPU topology.
 - Mach: machine-dependent startup, pmap/VM, scheduler, IPC, locks, atomics and timers.
