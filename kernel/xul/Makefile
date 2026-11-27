@@ -14,7 +14,7 @@ X86_64_CFLAGS = $(FREESTANDING_CFLAGS) -m64 -mno-red-zone -mno-mmx -mno-sse -mno
 ARM64_CFLAGS = $(FREESTANDING_CFLAGS) -mgeneral-regs-only
 
 XUL_COMMON_SOURCES = \
-	core/subsystem.c core/device.c core/platform.c core/kernel.c core/memory.c core/runtime.c core/entry.c core/exception.c core/pci.c \
+	core/subsystem.c core/device.c core/platform.c core/kernel.c core/memory.c core/ipc.c core/runtime.c core/entry.c core/exception.c core/pci.c \
 	boot/limine/entry.c boot/limine/requests.c \
 	io/stream.c compat/linux/pci.c compat/linux/net.c \
 	bsd/net/net.c bsd/vfs/vfs.c bsd/posix/syscall.c bsd/posix/fd.c bsd/nke/nke.c
@@ -38,8 +38,8 @@ $(BUILD_DIR)/test_stream: io/stream.c tests/test_stream.c io/stream.h include/xu
 $(BUILD_DIR)/test_memory: core/memory.c tests/test_memory.c include/xul/memory.h include/xul/boot.h include/xul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) core/memory.c tests/test_memory.c -o $@
 
-$(BUILD_DIR)/test_kernel: core/subsystem.c core/kernel.c core/memory.c tests/test_kernel.c include/xul/kernel.h include/xul/subsystem.h include/xul/platform.h include/xul/pci.h include/xul/memory.h | $(BUILD_DIR)
-	$(CC) $(CPPFLAGS) $(CFLAGS) -DXUL_TESTING core/subsystem.c core/kernel.c core/memory.c tests/test_kernel.c -o $@
+$(BUILD_DIR)/test_kernel: core/subsystem.c core/kernel.c core/memory.c core/ipc.c tests/test_kernel.c include/xul/kernel.h include/xul/subsystem.h include/xul/platform.h include/xul/pci.h include/xul/memory.h | $(BUILD_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -DXUL_TESTING core/subsystem.c core/kernel.c core/memory.c core/ipc.c tests/test_kernel.c -o $@
 
 $(BUILD_DIR)/test_pci: core/device.c core/pci.c compat/linux/pci.c tests/test_pci.c include/xul/pci.h include/xul/linux_pci.h include/xul/device.h include/xul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DXUL_TESTING core/device.c core/pci.c compat/linux/pci.c tests/test_pci.c -o $@
@@ -62,6 +62,9 @@ $(BUILD_DIR)/test_posix: bsd/posix/syscall.c tests/test_posix.c include/xul/posi
 $(BUILD_DIR)/test_posix_vfs: bsd/vfs/vfs.c bsd/posix/fd.c tests/test_posix_vfs.c include/xul/vfs.h include/xul/posix.h include/xul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DXUL_TESTING bsd/vfs/vfs.c bsd/posix/fd.c tests/test_posix_vfs.c -o $@
 
+$(BUILD_DIR)/test_ipc: core/ipc.c tests/test_ipc.c include/xul/ipc.h include/xul/status.h | $(BUILD_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) core/ipc.c tests/test_ipc.c -o $@
+
 $(BUILD_DIR)/test_nke: bsd/nke/nke.c tests/test_nke.c include/xul/nke.h include/xul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DXUL_TESTING bsd/nke/nke.c tests/test_nke.c -o $@
 
@@ -71,7 +74,7 @@ $(BUILD_DIR)/test_platform: core/platform.c tests/test_platform.c include/xul/pl
 $(BUILD_DIR)/test_device: core/device.c tests/test_device.c include/xul/device.h include/xul/status.h | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DXUL_TESTING core/device.c tests/test_device.c -o $@
 
-test: $(BUILD_DIR)/test_subsystem $(BUILD_DIR)/test_stream $(BUILD_DIR)/test_device $(BUILD_DIR)/test_platform $(BUILD_DIR)/test_kernel $(BUILD_DIR)/test_memory $(BUILD_DIR)/test_pci $(BUILD_DIR)/test_linux_pci $(BUILD_DIR)/test_net $(BUILD_DIR)/test_linux_net $(BUILD_DIR)/test_vfs $(BUILD_DIR)/test_posix $(BUILD_DIR)/test_posix_vfs $(BUILD_DIR)/test_nke
+test: $(BUILD_DIR)/test_subsystem $(BUILD_DIR)/test_stream $(BUILD_DIR)/test_device $(BUILD_DIR)/test_platform $(BUILD_DIR)/test_kernel $(BUILD_DIR)/test_memory $(BUILD_DIR)/test_pci $(BUILD_DIR)/test_linux_pci $(BUILD_DIR)/test_net $(BUILD_DIR)/test_linux_net $(BUILD_DIR)/test_vfs $(BUILD_DIR)/test_posix $(BUILD_DIR)/test_posix_vfs $(BUILD_DIR)/test_nke $(BUILD_DIR)/test_ipc
 	./$(BUILD_DIR)/test_subsystem
 	./$(BUILD_DIR)/test_stream
 	./$(BUILD_DIR)/test_device
@@ -86,6 +89,7 @@ test: $(BUILD_DIR)/test_subsystem $(BUILD_DIR)/test_stream $(BUILD_DIR)/test_dev
 	./$(BUILD_DIR)/test_posix
 	./$(BUILD_DIR)/test_posix_vfs
 	./$(BUILD_DIR)/test_nke
+	./$(BUILD_DIR)/test_ipc
 
 $(BUILD_DIR)/x86_64/%.o: %.c
 	@mkdir -p $(dir $@)
@@ -155,6 +159,9 @@ source-audit:
 	@test -f boot/limine/entry.c
 	@test -f boot/limine/requests.c
 	@test -f include/xul/limine.h
+	@test -f include/xul/ipc.h
+	@test -f core/ipc.c
+	@test -f tests/test_ipc.c
 	@test -f include/xul/linux_net.h
 	@test -f compat/linux/net.c
 	@test -f tests/test_linux_net.c
