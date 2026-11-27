@@ -10,6 +10,7 @@
 #include "xul/kernel.h"
 #include "xul/subsystem.h"
 #include "xul/memory.h"
+#include "xul/ipc.h"
 
 static int sequence[8], sequence_count;
 static const xul_memory_region_t boot_memory[] = {
@@ -51,6 +52,7 @@ int main(void)
 {
     xul_boot_info_t boot = {0};
     const xul_kernel_context_t *context;
+    xul_port_t boot_port;
     xul_subsystem_test_reset();
     sequence_count = 0;
     fake_devices = 2;
@@ -83,7 +85,10 @@ int main(void)
     context = xul_kernel_context();
     assert(context->pci_devices == 2);
     assert(context->boot_info.magic == XUL_BOOT_INFO_MAGIC);
+    assert(xul_port_create(1, &boot_port) == XUL_OK);
+    assert(xul_port_destroy(1, boot_port) == XUL_OK);
     xul_kernel_shutdown();
+    assert(xul_port_create(1, &boot_port) == XUL_E_STATE);
     assert(sequence_count == 4 && sequence[3] == 4);
 
     puts("XUL kernel boot orchestration tests: PASS");
